@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 
 	"github.com/hashicorp/packer/common/json"
-	"github.com/influx6/mgo-dataset/dataset/config"
+	"github.com/influx6/dataset/dataset/config"
 	"github.com/robertkrimen/otto"
 )
 
@@ -19,16 +19,16 @@ import (
 type JSOtto struct {
 	Fn   otto.Value
 	VM   *otto.Otto
-	Conf config.Config
+	Conf config.JSOttoConf
 }
 
 // New returns a new instance of JSOtto which implements the Procs interface.
-func New(conf config.Config) (*JSOtto, error) {
+func New(conf config.JSOttoConf) (JSOtto, error) {
 	vm := otto.New()
 
 	// Attempt to load all libraries first into vm,
 	// return error if error occured.
-	for _, library := range conf.JS.Libraries {
+	for _, library := range conf.Libraries {
 		libdata, err := ioutil.ReadFile(library)
 		if err != nil {
 			return nil, err
@@ -42,7 +42,7 @@ func New(conf config.Config) (*JSOtto, error) {
 
 	// Attempt to load main library into vm,
 	// return error if it occurs also.
-	maindata, err := ioutil.ReadFile(conf.JS.Main)
+	maindata, err := ioutil.ReadFile(conf.Main)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +52,7 @@ func New(conf config.Config) (*JSOtto, error) {
 		return nil, err
 	}
 
-	fn, err := vm.Get(conf.JS.Target)
+	fn, err := vm.Get(conf.Target)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +61,7 @@ func New(conf config.Config) (*JSOtto, error) {
 		return nil, errors.New("JSOttoConf.Target must be a function")
 	}
 
-	return &JSOtto{
+	return JSOtto{
 		Fn:   fn,
 		VM:   vm,
 		Conf: conf,
@@ -69,7 +69,7 @@ func New(conf config.Config) (*JSOtto, error) {
 }
 
 // Transforms takes incoming records which it transforms into json then calls appropriate
-func (jso *JSOtto) Transform(records ...map[string]interface{}) ([]map[string]interface{}, error) {
+func (jso JSOtto) Transform(records ...map[string]interface{}) ([]map[string]interface{}, error) {
 	jsonr, err := jso.VM.Get("JSON")
 	if err != nil {
 		return nil, err

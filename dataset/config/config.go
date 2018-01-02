@@ -7,9 +7,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	"github.com/BurntSushi/toml"
-	"github.com/influx6/faux/db/mongo"
 )
 
 const (
@@ -17,17 +14,16 @@ const (
 	// sent into proc for processing, which can vise-versa mean
 	// the expected records to be produced from output, but this
 	// is user dependent and not a hard rule.
-	DefaultBatch = 1
+	DefaultBatch = 100
+
+	// DefaultInterval indicates the default expected time for each
+	// requests to be processed before waiting for it's next run.
+	DefaultInterval = time.Second * 60
 )
 
-// Config embodies the configuration expected to be loaded
-// by user for processing a collection which would then be
-// saved to the Geckoboard API.
-type Config struct {
-	JS     JSOttoConf    `toml:"js"`
-	Dest   *mongo.Config `toml:"dest"`
-	Binary BinaryConf    `toml:"binary"`
-	Source mongo.Config  `toml:"source"`
+type DatasetConfig struct {
+	JS     JSOttoConf `toml:"js"`
+	Binary BinaryConf `toml:"binary"`
 
 	// Pull, process and update record at giving intervals. (Optional)
 	Interval string `toml:"interval"`
@@ -36,7 +32,7 @@ type Config struct {
 	Driver string `toml:"driver"`
 
 	// Batch indicates total records expected by proc to be processed, default is 1.
-	Batch uint16 `toml:"batch"`
+	Batch int `toml:"batch"`
 
 	// Dataset indicates the dataset to be used for saving processed results.
 	Dataset string `toml:"dataset"`
@@ -47,65 +43,35 @@ type Config struct {
 	RunInterval time.Duration `toml:"-"`
 }
 
-// Load attempts to use toml to decode file content into Config instance.
-func (c *Config) Load(targetFile string) error {
-	if _, err := toml.DecodeFile(targetFile, c); err != nil {
-		return err
-	}
-
-	if c.Batch == 0 {
-		c.Batch = DefaultBatch
-	}
-
-	return c.Validate()
-}
-
 // Validate returns an error if the config is invalid.
-func (c *Config) Validate() error {
-	if err := c.Source.Validate(); err != nil {
-		return err
-	}
-
-	if c.Dest != nil {
-		if err := c.Dest.Validate(); err != nil {
-			// if the Collection is not set and we are still not
-			// empty then we have a configuration error.
-			if c.Dest.Collection == "" && !c.Dest.Empty() {
-				return err
-			}
-
-			// if the destination collection is set, then we are
-			// properly dealing we new collection to house processed
-			// result, but should use existing Source credentials.
-			// So we copy c.Source then change collection
-			if c.Dest.Collection != "" {
-				newDest := c.Source.CloneWithCollection(c.Dest.Collection)
-				c.Dest = &newDest
-			}
-		}
-	}
-
-	if c.APIKey == "" {
+func (dc *DatasetConfig) Validate() error {
+	if dc.APIKey == "" {
 		return errors.New("APIKey is required")
 	}
 
-	if c.Dataset == "" {
+	if dc.Dataset == "" {
 		return errors.New("Dataset name is required")
 	}
 
-	if c.Interval != "" {
-		interval, err := time.ParseDuration(c.Interval)
+	if dc.Interval != "" {
+		interval, err := time.ParseDuration(dc.Interval)
 		if err != nil {
 			return err
 		}
-		c.RunInterval = interval
+		dc.RunInterval = interval
+	} else {
+		dc.RunInterval = DefaultInterval
 	}
 
-	switch strings.ToLower(c.Driver) {
+	if dc.Batch == 0 {
+		dc.Batch = DefaultBatch
+	}
+
+	switch strings.ToLower(dc.Driver) {
 	case "jsotto", "js":
-		return c.JS.Validate()
+		return dc.JS.Validate()
 	case "binary":
-		return c.Binary.Validate()
+		return dc.Binary.Validate()
 	}
 
 	return nil

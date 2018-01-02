@@ -3,17 +3,15 @@ package jsotto_test
 import (
 	"testing"
 
+	"github.com/influx6/dataset/dataset/config"
+	"github.com/influx6/dataset/dataset/procs/jsotto"
 	"github.com/influx6/faux/tests"
-	"github.com/influx6/mgo-dataset/dataset/config"
-	"github.com/influx6/mgo-dataset/dataset/procs/jsotto"
 )
 
 func TestJSOtto(t *testing.T) {
-	jt, err := jsotto.New(config.Config{
-		JS: config.JSOttoConf{
-			Main:   "./fixtures/main.js",
-			Target: "ParseRecord",
-		},
+	jt, err := jsotto.New(config.JSOttoConf{
+		Main:   "./fixtures/main.js",
+		Target: "ParseRecord",
 	})
 
 	if err != nil {

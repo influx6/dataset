@@ -1,14 +1,21 @@
-MgoDataset
+Dataset
 ----------------
-MgoDataset is a project similar to the [SqlDataset](https://github.com/geckoboard/sql-dataset), which allows the exporting of collection data into your Geckobaord account's dataset.
+Dataset is a project similar to the [SqlDataset](https://github.com/geckoboard/sql-dataset), which allows the exporting of collection data into your Geckobaord account's dataset using a combination of processors, pullers and pushers.
 
-It provides a more involved approach to the processing of incoming data both to allow flexibility and user control of what the data gets transformed into both in shape and form. 
+It provides a more involved approach to the processing of incoming data both to allow flexibility and user control of what the data gets transformed in both shape and form by the user. 
+
+It will bundle 
 
 ## Install
 
 ```bash
-go get -u github.com/influx6/mgo-dataset
+go get -u github.com/influx6/dataset/...
 ```
+
+## Commands
+
+#### `mgo-dataset`
+
 
 ## Procs
 
