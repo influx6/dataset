@@ -14,6 +14,6 @@ go get -u github.com/influx6/mgo-dataset
 
 MgoDataset employs the idea of processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
 
-### Javascript file
+### Javascript
 
-### Binary file
+### Binaries
