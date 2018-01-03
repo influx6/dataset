@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/BurntSushi/toml"
 	"github.com/influx6/dataset/dataset/config"
 	"github.com/influx6/faux/db/mongo"
@@ -11,9 +13,10 @@ import (
 // by user for processing a collection which would then be
 // saved to the Geckoboard API.
 type Config struct {
-	config.DatasetConfig
-	Dest   *mongo.Config `toml:"dest"`
-	Source mongo.Config  `toml:"source"`
+	config.ProcConfig
+	Dest     *mongo.Config          `toml:"dest"`
+	Source   mongo.Config           `toml:"source"`
+	Datasets []config.DatasetConfig `toml:"datasets"`
 }
 
 // Load attempts to use toml to decode file content into Config instance.
@@ -27,6 +30,10 @@ func (c *Config) Load(targetFile string) error {
 
 // Validate returns an error if the config is invalid.
 func (c *Config) Validate() error {
+	if err := c.ProcConfig.Validate(); err != nil {
+		return err
+	}
+
 	if err := c.Source.Validate(); err != nil {
 		return err
 	}
@@ -50,7 +57,13 @@ func (c *Config) Validate() error {
 		}
 	}
 
-	return c.DatasetConfig.Validate()
+	for _, ds := range c.Datasets {
+		if err := ds.Validate(); err != nil {
+			return fmt.Errorf("dataset %+q: %+s", ds.Dataset, err.Error())
+		}
+	}
+
+	return nil
 }
 
 func main() {

@@ -1,6 +1,7 @@
 package jsotto
 
 import (
+	"context"
 	"errors"
 	"io/ioutil"
 
@@ -31,12 +32,12 @@ func New(conf config.JSOttoConf) (JSOtto, error) {
 	for _, library := range conf.Libraries {
 		libdata, err := ioutil.ReadFile(library)
 		if err != nil {
-			return nil, err
+			return JSOtto{}, err
 		}
 
 		_, err = vm.Run(libdata)
 		if err != nil {
-			return nil, err
+			return JSOtto{}, err
 		}
 	}
 
@@ -44,21 +45,21 @@ func New(conf config.JSOttoConf) (JSOtto, error) {
 	// return error if it occurs also.
 	maindata, err := ioutil.ReadFile(conf.Main)
 	if err != nil {
-		return nil, err
+		return JSOtto{}, err
 	}
 
 	_, err = vm.Run(maindata)
 	if err != nil {
-		return nil, err
+		return JSOtto{}, err
 	}
 
 	fn, err := vm.Get(conf.Target)
 	if err != nil {
-		return nil, err
+		return JSOtto{}, err
 	}
 
 	if !fn.IsFunction() {
-		return nil, errors.New("JSOttoConf.Target must be a function")
+		return JSOtto{}, errors.New("JSOttoConf.Target must be a function")
 	}
 
 	return JSOtto{
@@ -69,7 +70,7 @@ func New(conf config.JSOttoConf) (JSOtto, error) {
 }
 
 // Transforms takes incoming records which it transforms into json then calls appropriate
-func (jso JSOtto) Transform(records ...map[string]interface{}) ([]map[string]interface{}, error) {
+func (jso JSOtto) Transform(ctx context.Context, records ...map[string]interface{}) ([]map[string]interface{}, error) {
 	jsonr, err := jso.VM.Get("JSON")
 	if err != nil {
 		return nil, err

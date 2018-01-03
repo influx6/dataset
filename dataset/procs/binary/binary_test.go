@@ -4,6 +4,8 @@ import (
 	"os"
 	"testing"
 
+	"context"
+
 	"github.com/influx6/dataset/dataset/config"
 	"github.com/influx6/dataset/dataset/procs/binary"
 	"github.com/influx6/faux/metrics"
@@ -21,7 +23,7 @@ func TestBinaryRun(t *testing.T) {
 		Binary: "./fixtures/bin/grun",
 	}, events)
 
-	res, err := binrunc.Transform(map[string]interface{}{
+	res, err := binrunc.Transform(context.Background(), map[string]interface{}{
 		"age":  20,
 		"name": "Alex Woldart",
 	})
@@ -59,7 +61,7 @@ func TestBinaryRunWithCommand(t *testing.T) {
 		Command: "Transform",
 	}, events)
 
-	res, err := binrunc.Transform(map[string]interface{}{
+	res, err := binrunc.Transform(context.Background(), map[string]interface{}{
 		"age":  20,
 		"name": "Alex Woldart",
 	})

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"time"
 
 	"context"
 
@@ -29,7 +28,7 @@ func New(config config.BinaryConf, m metrics.Metrics) *BinaryRunc {
 }
 
 // Transforms takes incoming records which it transforms into json then calls appropriate
-func (br BinaryRunc) Transform(records ...map[string]interface{}) ([]map[string]interface{}, error) {
+func (br BinaryRunc) Transform(ctx context.Context, records ...map[string]interface{}) ([]map[string]interface{}, error) {
 	var input, errs, output bytes.Buffer
 	if err := json.NewEncoder(&input).Encode(records); err != nil {
 		return nil, err
@@ -46,10 +45,9 @@ func (br BinaryRunc) Transform(records ...map[string]interface{}) ([]map[string]
 		exec.Input(&input),
 		exec.Output(&output),
 		exec.Command(command),
-		exec.Timeout(20*time.Second),
 	)
 
-	if err := binaryCmd.Exec(context.Background(), br.Metrics); err != nil {
+	if err := binaryCmd.Exec(ctx, br.Metrics); err != nil {
 		return nil, fmt.Errorf("%+s: %+s", err.Error(), errs.String())
 	}
 

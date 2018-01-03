@@ -3,6 +3,8 @@ package jsotto_test
 import (
 	"testing"
 
+	"context"
+
 	"github.com/influx6/dataset/dataset/config"
 	"github.com/influx6/dataset/dataset/procs/jsotto"
 	"github.com/influx6/faux/tests"
@@ -19,7 +21,7 @@ func TestJSOtto(t *testing.T) {
 	}
 	tests.Passed("Should have successfully created JSOtto instance")
 
-	res, err := jt.Transform(map[string]interface{}{
+	res, err := jt.Transform(context.Background(), map[string]interface{}{
 		"age":  20,
 		"name": "Alex Woldart",
 	})

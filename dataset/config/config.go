@@ -10,49 +10,48 @@ import (
 )
 
 const (
-	// DefaultBatch indicates the total records expected to be
-	// sent into proc for processing, which can vise-versa mean
-	// the expected records to be produced from output, but this
-	// is user dependent and not a hard rule.
-	DefaultBatch = 100
+	// DefaultPushBatch indicates the total records expected to be
+	// sent to the Pusher, which then delivers to it's corresponding
+	// endpoint destination e.g Geckobaord API.
+	DefaultPushBatch = 500
+
+	// DefaultPullBatch indicates the total records expected to be
+	// pulled and processed by Procs from the source.
+	DefaultPullBatch = 500
 
 	// DefaultInterval indicates the default expected time for each
 	// requests to be processed before waiting for it's next run.
 	DefaultInterval = time.Second * 60
 )
 
-type DatasetConfig struct {
-	JS     JSOttoConf `toml:"js"`
-	Binary BinaryConf `toml:"binary"`
+// ProcConfig embodies the configuration used for defining user configuration
+// for the proc processors who handle conversion of data to datastore records.
+type ProcConfig struct {
+	// JS indicates the configuration values for the JSOtto procs.
+	JS JSOttoConf `toml:"js" yaml:"js"`
+
+	// Binary indicates the configuration values to be used for the BinaryRunc procs.
+	Binary BinaryConf `toml:"binary" yaml:"binary"`
 
 	// Pull, process and update record at giving intervals. (Optional)
-	Interval string `toml:"interval"`
+	Interval string `toml:"interval" yaml:"interval"`
 
 	// Driver value indicates which proc is to be used for processing: js or binary.
-	Driver string `toml:"driver"`
+	Driver string `toml:"driver" yaml:"driver"`
 
-	// Batch indicates total records expected by proc to be processed, default is 1.
-	Batch int `toml:"batch"`
+	// PullBatch indicates total records expected by proc to be processed.
+	PullBatch int `toml:"pull_batch" yaml:"pullbatch"`
 
-	// Dataset indicates the dataset to be used for saving processed results.
-	Dataset string `toml:"dataset"`
+	// PushBatch indicates total records to be pushed per call to the upstream API.
+	PushBatch int `toml:"pull_batch" yaml:"pushbatch"`
 
-	// APIKey indicates the user's Geckboard API Key used for authentication of all save requests.
-	APIKey string `toml:"api_key"`
-
-	RunInterval time.Duration `toml:"-"`
+	// RunInterval gets the interval value provided through the `Interval` field or
+	// is set to DefaultInterval.
+	RunInterval time.Duration `toml:"-" yaml:"-"`
 }
 
 // Validate returns an error if the config is invalid.
-func (dc *DatasetConfig) Validate() error {
-	if dc.APIKey == "" {
-		return errors.New("APIKey is required")
-	}
-
-	if dc.Dataset == "" {
-		return errors.New("Dataset name is required")
-	}
-
+func (dc *ProcConfig) Validate() error {
 	if dc.Interval != "" {
 		interval, err := time.ParseDuration(dc.Interval)
 		if err != nil {
@@ -63,8 +62,12 @@ func (dc *DatasetConfig) Validate() error {
 		dc.RunInterval = DefaultInterval
 	}
 
-	if dc.Batch == 0 {
-		dc.Batch = DefaultBatch
+	if dc.PullBatch <= 0 {
+		dc.PullBatch = DefaultPullBatch
+	}
+
+	if dc.PushBatch <= 0 {
+		dc.PushBatch = DefaultPushBatch
 	}
 
 	switch strings.ToLower(dc.Driver) {
@@ -72,6 +75,41 @@ func (dc *DatasetConfig) Validate() error {
 		return dc.JS.Validate()
 	case "binary":
 		return dc.Binary.Validate()
+	}
+
+	return nil
+}
+
+// FieldType embodies field values for defining dataset field types.
+type FieldType struct {
+	Name     string `toml:"name" yaml:"name"`
+	Type     string `toml:"type"`
+	Currency string `toml:"currency"`
+	Optional bool   `toml:"optional"`
+}
+
+// DatasetConfig embodies the configuration data used to define the dataset to
+// be used and corresponding dataset field values to be used to create dataset.
+type DatasetConfig struct {
+	// Dataset indicates the dataset to be used for saving processed results.
+	Dataset string `toml:"dataset"`
+
+	// APIKey indicates the user's Geckoboard API Key used for authentication of all save requests.
+	APIKey string `toml:"api_key"`
+
+	// Fields indicates the fields defining the dataset which is expected to be used
+	// for storing the processed records.
+	Fields []FieldType `toml:"fields"`
+}
+
+// Validate returns an error if the config is invalid.
+func (dc *DatasetConfig) Validate() error {
+	if dc.APIKey == "" {
+		return errors.New("APIKey is required")
+	}
+
+	if dc.Dataset == "" {
+		return errors.New("Dataset name is required")
 	}
 
 	return nil
