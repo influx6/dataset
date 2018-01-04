@@ -13,9 +13,10 @@ import (
 // GeckoboardPusher implements the Pusher interface for sending data to the
 // Geckoboard API for the user's account identified by the auth key.
 type GeckoboardPusher struct {
-	Client geckoclient.Client
-	Config config.DatasetConfig
-	NewSet *geckoclient.NewDataset
+	created bool
+	Client  geckoclient.Client
+	Config  config.DatasetConfig
+	NewSet  *geckoclient.NewDataset
 }
 
 // NewGeckoboardPusher returns a new instance of GeckoboardPusher.
@@ -25,6 +26,7 @@ func NewGeckoboardPusher(conf config.DatasetConfig) (GeckoboardPusher, error) {
 		return GeckoboardPusher{}, err
 	}
 
+	// transform fields to dataset record.
 	set, err := transformFields(conf.Fields)
 	if err != nil {
 		return GeckoboardPusher{}, err
@@ -35,6 +37,15 @@ func NewGeckoboardPusher(conf config.DatasetConfig) (GeckoboardPusher, error) {
 		Client: client,
 		NewSet: &set,
 	}, nil
+}
+
+// FindOrCreate attempts to create pushers dataset if the pusher has an associated
+// NewDataSet field value which indicates need to create set if not existing.
+func (gh GeckoboardPusher) FindOrCreate(ctx context.Context) error {
+	if gh.NewSet == nil {
+		return nil
+	}
+	return gh.Client.Create(ctx, gh.Config.Dataset, *gh.NewSet)
 }
 
 // Push takes incoming map of records which will be the transformed data received

@@ -4,9 +4,9 @@ import (
 	"context"
 )
 
-// Procs defines an interface which embodies a a processor of
+// Proc defines an interface which embodies a a processor of
 // records.
-type Procs interface {
+type Proc interface {
 	Transform(context.Context, ...map[string]interface{}) ([]map[string]interface{}, error)
 }
 
@@ -42,7 +42,7 @@ func (dp DataPushers) Push(ctx context.Context, recs ...map[string]interface{}) 
 // instance processes data received from the Pull and stored into the Push
 // implementation.
 type Dataset struct {
-	Proc    Procs
+	Proc    Proc
 	Pull    DataPull
 	Pushers DataPushers
 }
@@ -63,22 +63,21 @@ func (ds Dataset) Do(ctx context.Context, pullBatch int, pushBatch int) error {
 		return err
 	}
 
-	if pushBatch >= len(recs) {
+	if pushBatch >= len(procRecs) || pullBatch < pushBatch {
 		return ds.Pushers.Push(ctx, procRecs...)
 	}
 
-	coq := len(recs) / pushBatch
-	for i := 0; i <= coq; i++ {
-		batch := pushBatch * i
-
-		if batch >= len(recs) {
+	totalBatch := len(recs) / pushBatch
+	for i := 1; i <= totalBatch; i++ {
+		if pushBatch >= len(recs) {
 			if err = ds.Pushers.Push(ctx, recs...); err != nil {
 				return err
 			}
+			return nil
 		}
 
-		next := recs[:batch]
-		recs = recs[batch:]
+		next := recs[:pushBatch]
+		recs = recs[pushBatch:]
 		if err = ds.Pushers.Push(ctx, next...); err != nil {
 			return err
 		}
