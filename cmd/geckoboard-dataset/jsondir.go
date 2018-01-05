@@ -76,7 +76,7 @@ type jsonDirDataset struct {
 	config.DatasetConfig
 
 	Deep      bool   `toml:"deep"`
-	SourceDir string `toml:"source"`
+	SourceDir string `toml:"source_dir"`
 }
 
 // Validate returns an error if the config is invalid.
@@ -85,17 +85,21 @@ func (c *jsonDirDataset) Validate() error {
 		return err
 	}
 
-	if c.SourceDir != "" {
-		return errors.New("config.Source must be provided")
+	if err := c.DatasetConfig.Validate(); err != nil {
+		return err
+	}
+
+	if c.SourceDir == "" {
+		return errors.New("config.SourceDir must be provided")
 	}
 
 	stat, err := os.Stat(c.SourceDir)
 	if err != nil {
-		return err
+		return errors.New("config.SourceDir must be found")
 	}
 
-	if stat.IsDir() {
-		return errors.New("config.Source must be a file")
+	if !stat.IsDir() {
+		return errors.New("config.SourceDir must not be a file")
 	}
 
 	return nil

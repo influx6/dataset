@@ -85,6 +85,10 @@ func (c *jsonDataset) Validate() error {
 		return err
 	}
 
+	if err := c.DatasetConfig.Validate(); err != nil {
+		return err
+	}
+
 	if c.Source == "" {
 		return errors.New("config.Source must be provided")
 	}

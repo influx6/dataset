@@ -25,7 +25,7 @@ func runMGODataset(ctx context.Context, set config.DatasetConfig, ds mgoDataset,
 		return err
 	}
 
-	mdb := mongo.NewMongoDB(ds.SourceConfig)
+	mdb := mongo.NewMongoDB(ds.DB)
 
 	var transformer dataset.Proc
 
@@ -83,18 +83,26 @@ type mgoDataset struct {
 	config.DriverConfig
 	config.DatasetConfig
 
-	Source       string       `toml:"source"`
-	Destination  string       `toml:"destination"`
-	SourceConfig mongo.Config `toml:"source_config"`
+	Destination string       `toml:"dest"`
+	Source      string       `toml:"source"`
+	DB          mongo.Config `toml:"db"`
 }
 
 // Validate returns an error if the config is invalid.
 func (c *mgoDataset) Validate() error {
+	if err := c.DriverConfig.Validate(); err != nil {
+		return err
+	}
+
+	if err := c.DatasetConfig.Validate(); err != nil {
+		return err
+	}
+
 	if c.Source == "" {
 		return errors.New("mongo.Source is required")
 	}
 
-	if err := c.SourceConfig.Validate(); err != nil {
+	if err := c.DB.Validate(); err != nil {
 		return err
 	}
 

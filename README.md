@@ -45,10 +45,12 @@ It which exposes a `push` command which handles the necessary logic to process p
 
 ## Configuration
 
-- Using JS Processors
-Below configuration showcases a sample of config, useful for processing 
+Listing below are different configuration for usage of the geckodataset CLI tooling for sourcing data either through a [MongoDB](htts://mongodb.com) database collection or through a json file or directory:
 
-```json
+- Using Javascript Processor with JSON source file
+
+
+```toml
 interval= "60s"
 pull_batch = 100
 push_batch = 100
@@ -57,14 +59,14 @@ api_key = "your_api_key"
 [[datasets]]
 driver = "json-file"
 
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "./fixtures/sales/user_sales.json"
+
 [datasets.conf.js]
 target = "transformDocument"
 main = "./fixtures/transforms/js/user_sales.js"
 libraries = ["./fixtures/transforms/js/support/types.js"]
-
-[datasets.conf]
-dataset = "user_sales_freq"
-source = "./fixtures/sales/user_sales.json"
 
 [[datasets.conf.fields]]
 name = "user"
@@ -75,34 +77,107 @@ name = "scores"
 type = "number"
 ```
 
-- Binary Processors
+- Using Javascript Processor with MongoDB source
 
-```
-interval: 60s
-pull_batch: 100
-push_batch: 100
-api_key: your_api_key
+
+```toml
+interval= "60s"
+pull_batch = 100
+push_batch = 100
+api_key = "your_api_key"
 
 [[datasets]]
-driver: json-file
+driver = "mongodb"
 
-[[datasets.conf]]
-source: "user_sales_collany"
-destination: "user_sales_almagation"
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "user_sales_collection"
+dest = "user_sales_metrics" # optional, we want to save transformed records here
 
-[[datasets.conf.binary]]
-command: transform
-binary: ./binaries/user_sales
+[datasets.conf.db]
+authdb = "admin"
+db = "machines_sales"
+user = "tobi_mach"
+password = "xxxxxxxxxxxx"
+host = "db.mongo.com:4500"
+
+[datasets.conf.js]
+target = "transformDocument"
+main = "./fixtures/transforms/js/user_sales.js"
+libraries = ["./fixtures/transforms/js/support/types.js"]
 
 [[datasets.conf.fields]]
-name: "user"
-type: string
+name = "user"
+type = "string"
 
 [[datasets.conf.fields]]
-name: "scores"
-type: number
-	
+name = "scores"
+type = "number"
+```
 
+- Binary Processor with JSON source file
+
+```toml
+interval= "60s"
+pull_batch = 100
+push_batch = 100
+api_key = "your_api_key"
+
+[[datasets]]
+driver = "json-file"
+
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "./fixtures/sales/user_sales.json"
+
+[datasets.conf.js]
+target = "transformDocument"
+main = "./fixtures/transforms/js/user_sales.js"
+libraries = ["./fixtures/transforms/js/support/types.js"]
+
+[[datasets.conf.fields]]
+name = "user"
+type = "string"
+
+[[datasets.conf.fields]]
+name = "scores"
+type = "number"
+```
+
+- Using Binary Processor with MongoDB source
+
+
+```toml
+interval= "60s"
+pull_batch = 100
+push_batch = 100
+api_key = "your_api_key"
+
+[[datasets]]
+driver = "mongodb"
+
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "user_sales_collection"
+dest = "user_sales_metrics" # optional, we want to save transformed records here
+
+[datasets.conf.db]
+authdb = "admin"
+db = "machines_sales"
+user = "tobi_mach"
+password = "xxxxxxxxxxxx"
+host = "db.mongo.com:4500"
+
+[datasets.conf.binary]
+binary = "echo"
+
+[[datasets.conf.fields]]
+name = "user"
+type = "string"
+
+[[datasets.conf.fields]]
+name = "scores"
+type = "number"
 ```
 
 ## Processors/Procs

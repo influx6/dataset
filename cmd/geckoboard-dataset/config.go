@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"io/ioutil"
 	"strings"
 
@@ -48,8 +47,6 @@ func loadConfig(ctx context.Context, configData string) (datasetList, error) {
 		if err := toml.NewEncoder(&encoded).Encode(dataset.Conf); err != nil {
 			return datasetList{}, err
 		}
-
-		fmt.Printf("%+s\n", encoded.String())
 
 		switch strings.ToLower(dataset.Driver) {
 		case "mongodb":
