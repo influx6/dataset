@@ -12,7 +12,7 @@ import (
 
 	"path/filepath"
 
-	"github.com/influx6/dataset/dataset"
+	"github.com/influx6/geckodataset/dataset"
 )
 
 // JSONStream representing in-memory data over processed json data.

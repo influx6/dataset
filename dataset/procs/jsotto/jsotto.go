@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 
 	"github.com/hashicorp/packer/common/json"
-	"github.com/influx6/dataset/dataset/config"
+	"github.com/influx6/geckodataset/dataset/config"
 	"github.com/robertkrimen/otto"
 )
 

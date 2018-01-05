@@ -3,23 +3,24 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
-
-	"strings"
 
 	"time"
 
-	"github.com/influx6/dataset/dataset"
-	"github.com/influx6/dataset/dataset/config"
-	"github.com/influx6/dataset/dataset/procs/binary"
-	"github.com/influx6/dataset/dataset/procs/jsotto"
-	"github.com/influx6/dataset/dataset/pushers"
 	"github.com/influx6/faux/db/mongo"
 	"github.com/influx6/faux/metrics"
+	"github.com/influx6/geckodataset/dataset"
+	"github.com/influx6/geckodataset/dataset/config"
+	"github.com/influx6/geckodataset/dataset/procs/binary"
+	"github.com/influx6/geckodataset/dataset/procs/jsotto"
+	"github.com/influx6/geckodataset/dataset/pushers"
 )
 
-func runMGODataset(ctx context.Context, ds mgoDirDataset, conf config.ProcConfig) error {
-	geckoboard, err := pushers.NewGeckoboardPusher(ds.Dataset)
+func runMGODataset(ctx context.Context, set config.DatasetConfig, ds mgoDataset, conf config.ProcConfig) error {
+	if ds.JS == nil && ds.Binary == nil {
+		return errors.New("JS or Binary configuration required")
+	}
+
+	geckoboard, err := pushers.NewGeckoboardPusher(conf.APIKey, set)
 	if err != nil {
 		return err
 	}
@@ -27,16 +28,18 @@ func runMGODataset(ctx context.Context, ds mgoDirDataset, conf config.ProcConfig
 	mdb := mongo.NewMongoDB(ds.SourceConfig)
 
 	var transformer dataset.Proc
-	switch strings.ToLower(ds.Driver) {
-	case "js", "jsotto":
+
+	if ds.Binary != nil {
+		transformer = binary.New(*ds.Binary, metrics.New())
+	}
+
+	if ds.JS != nil {
 		jso, err := jsotto.New(*ds.JS)
 		if err != nil {
 			return err
 		}
 
 		transformer = jso
-	case "binary":
-		transformer = binary.New(*ds.Binary, metrics.New())
 	}
 
 	puller := new(mongo.MongoPull)
@@ -76,20 +79,17 @@ func runMGODataset(ctx context.Context, ds mgoDirDataset, conf config.ProcConfig
 
 // mgoDataset defines json dataset requests for
 // specific file.
-type mgoDirDataset struct {
+type mgoDataset struct {
 	config.DriverConfig
-	Source       string
-	Destination  string
-	SourceConfig mongo.Config         `toml:"source"`
-	Dataset      config.DatasetConfig `toml:"datasets"`
+	config.DatasetConfig
+
+	Source       string       `toml:"source"`
+	Destination  string       `toml:"destination"`
+	SourceConfig mongo.Config `toml:"source_config"`
 }
 
 // Validate returns an error if the config is invalid.
-func (c *mgoDirDataset) Validate() error {
-	if err := c.Dataset.Validate(); err != nil {
-		return fmt.Errorf("dataset %+q: %+s", c.Dataset, err.Error())
-	}
-
+func (c *mgoDataset) Validate() error {
 	if c.Source == "" {
 		return errors.New("mongo.Source is required")
 	}

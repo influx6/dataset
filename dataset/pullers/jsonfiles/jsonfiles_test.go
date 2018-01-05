@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/influx6/dataset/dataset"
-	"github.com/influx6/dataset/dataset/pullers/jsonfiles"
 	"github.com/influx6/faux/tests"
+	"github.com/influx6/geckodataset/dataset"
+	"github.com/influx6/geckodataset/dataset/pullers/jsonfiles"
 )
 
 func TestJSONStreamWithBadJSONFile(t *testing.T) {

@@ -7,9 +7,9 @@ import (
 
 	"context"
 
-	"github.com/influx6/dataset/dataset/config"
 	"github.com/influx6/faux/exec"
 	"github.com/influx6/faux/metrics"
+	"github.com/influx6/geckodataset/dataset/config"
 )
 
 // BinaryRunc implements dataset.Proc which uses a provided binary file path

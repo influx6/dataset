@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -30,17 +31,10 @@ type DriverConfig struct {
 
 	// Binary indicates the configuration values to be used for the BinaryRunc procs.
 	Binary *BinaryConf `toml:"binary"`
-
-	// Driver value indicates which proc is to be used for processing: js or binary.
-	Driver string `toml:"driver"`
 }
 
 // Validate returns an error if the config is invalid.
 func (dc *DriverConfig) Validate() error {
-	if dc.Binary == nil && dc.JS == nil {
-		return errors.New("ProcConfig.JS or ProcConfig.Binary must either be provided")
-	}
-
 	if dc.JS != nil {
 		if err := dc.JS.Validate(); err != nil {
 			return err
@@ -125,7 +119,7 @@ type DatasetConfig struct {
 // Validate returns an error if the config is invalid.
 func (dc *DatasetConfig) Validate() error {
 	if dc.Dataset == "" {
-		return errors.New("Dataset name is required")
+		return errors.New("DatasetConfig.DatasetName is required")
 	}
 
 	return nil
@@ -135,8 +129,8 @@ func (dc *DatasetConfig) Validate() error {
 // providing user processing function for conversion of incoming mongo data
 // using the otto javascript vm. https://github.com/robertkrimen/otto.
 type JSOttoConf struct {
-	Target    string   `toml:"target"`
 	Main      string   `toml:"main"`
+	Target    string   `toml:"target"`
 	Libraries []string `toml:"libraries"`
 }
 
@@ -145,9 +139,20 @@ func (jsc JSOttoConf) Validate() error {
 	if jsc.Target == "" {
 		return errors.New("JSOttoConf.Target is required")
 	}
+
 	if jsc.Main == "" {
 		return errors.New("JSOttoConf.Main is required")
 	}
+
+	stat, err := os.Stat(jsc.Main)
+	if err != nil {
+		return fmt.Errorf("JSOttoConf.Main must exists: %+s", err.Error())
+	}
+
+	if stat.IsDir() {
+		return errors.New("JSOttoConf.Binary can't point to a directory")
+	}
+
 	return nil
 }
 
@@ -172,7 +177,7 @@ func (gc *BinaryConf) Validate() error {
 	if filepath.IsAbs(gc.Binary) {
 		stat, err := os.Stat(gc.Binary)
 		if err != nil {
-			return err
+			return fmt.Errorf("BinaryConf.Binary must exists: %+s", err.Error())
 		}
 
 		if stat.IsDir() {

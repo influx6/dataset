@@ -7,9 +7,12 @@ import (
 func main() {
 	flags.Run("dataset", flags.Command{
 		Name:      "push",
-		Action:    mgoAction,
 		ShortDesc: "Push data from a mongodb to the geckoboard API",
-		Desc:      `mongo allows pushing data from a MongoDB database collection after getting processed using the dataset system then pushed to user's Geckoboard API account`,
+		Desc:      `Push takes provided configuration which uses to retrieve, process and push new data to user's dataset repositories on the Geckoboard API.`,
+		Action: func(context flags.Context) error {
+			configFile, _ := context.GetString("config")
+			return pushDatasets(context, configFile)
+		},
 		Flags: []flags.Flag{
 			&flags.StringFlag{
 				Name:    "config",

@@ -5,9 +5,9 @@ import (
 
 	"context"
 
-	"github.com/influx6/dataset/dataset/config"
-	"github.com/influx6/dataset/dataset/procs/jsotto"
 	"github.com/influx6/faux/tests"
+	"github.com/influx6/geckodataset/dataset/config"
+	"github.com/influx6/geckodataset/dataset/procs/jsotto"
 )
 
 func TestJSOtto(t *testing.T) {

@@ -1,104 +1,119 @@
-Dataset
+GeckoDataset
 ----------------
-Dataset is a project similar to the [SqlDataset](https://github.com/geckoboard/sql-dataset), which allows the exporting of collection data into your Geckobaord account's dataset using a combination of processors, pullers and pushers.
+GeckoDataset is a project similar to the [Sql-Dataset](https://github.com/geckoboard/sql-dataset), which allows the exporting of collection data into your Geckobaord account's dataset using a combination of processors, pullers and pushers.
 
-It provides a more involved approach to the processing of incoming data both to allow flexibility and user control of what the data gets transformed in both shape and form by the user. 
+It provides a more involved approach to the transformation of incoming data which then gets saved into a dataset of your choosing on your Geckoboard API account. It takes this approach to both allow flexibility and user control of what the data gets transformed to, in both shape and form. 
 
-It will bundle 
 
 ## Install
 
 ```bash
-go get -u github.com/influx6/dataset/...
+go get -u github.com/influx6/geckodataset/...
 ```
 
-## Commands
+## Run
 
-Each command below expects to be provided a path to a config file which will be used to configure different areas and need of command. 
+GeckoDataset provides a CLI tooling called `geckoboard-dataset` which is central means of using the project:
 
-*Dataset relies on [Toml](https://github.com/toml-lang/toml) for it's configuration.*
+```bash
+> geckoboard-dataset 
+Usage: dataset [flags] [command] 
 
-### `mgo`
+⡿ COMMANDS:
+	⠙ push	Push data from a mongodb to the geckoboa
 
-`mgo` is a command which helps process records stored within a mongodb database collection which is processed through configured processor then pushed to the dataset account of the user.
 
-#### Configuration
+⡿ HELP:
+	Run [command] help
 
-- JS Processors
+⡿ OTHERS:
+	Run 'dataset printflags' to print all flags of all commands.
+
+⡿ WARNING:
+	Uses internal flag package so flags must precede command name. 
+	e.g 'dataset -cmd.flag=4 run'
 
 ```
-api_key: your_api_key
-interval: 60s
-pull_batch: 100
-push_batch: 100
+
+It which exposes a `push` command which handles the necessary logic to process provided configuration for the retrieval, transformation and update of dataset data.
+
+```bash
+> geckoboard-dataset push -config config.toml
+```
+
+*GeckoDataset relies on [Toml](https://github.com/toml-lang/toml) for it's configuration.*
+
+## Configuration
+
+- Using JS Processors
+Below configuration showcases a sample of config, useful for processing 
+
+```json
+interval= "60s"
+pull_batch = 100
+push_batch = 100
+api_key = "your_api_key"
 
 [[datasets]]
-driver: js
-dataset: "user_sales_score"
-source: "./scores/user_sales.json"
+driver = "json-file"
 
-	[[datasets.js]]
-	target: transformDocument
-	main: "./transforms/js/user_sales.js"
-	libraries: ["./assets/js/support/types.js"]
+[datasets.conf.js]
+target = "transformDocument"
+main = "./fixtures/transforms/js/user_sales.js"
+libraries = ["./fixtures/transforms/js/support/types.js"]
 
-	[[datasets.dataset]]
-	dataset: "user_sales_freq"
-		
-	[[datasets.dataset.fields]]
-	name: "user"
-	type: string
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "./fixtures/sales/user_sales.json"
 
-	[[datasets.dataset.fields]]
-	name: "scores"
-	type: number
+[[datasets.conf.fields]]
+name = "user"
+type = "string"
 
-
+[[datasets.conf.fields]]
+name = "scores"
+type = "number"
 ```
 
 - Binary Processors
 
 ```
 interval: 60s
-driver: js
+pull_batch: 100
+push_batch: 100
+api_key: your_api_key
 
-[source]
+[[datasets]]
+driver: json-file
 
-[dataset]
+[[datasets.conf]]
+source: "user_sales_collany"
+destination: "user_sales_almagation"
+
+[[datasets.conf.binary]]
+command: transform
+binary: ./binaries/user_sales
+
+[[datasets.conf.fields]]
+name: "user"
+type: string
+
+[[datasets.conf.fields]]
+name: "scores"
+type: number
 	
-
-```
-
-### `json-dir`
-
-`json-dir` is a command which helps process records stored within a directory of json files which is processed through configured processor then pushed to the dataset account of the user.
-
-#### Configuration
-
-```
-
-```
-
-### `json-file`
-
-`json-file` is a command which helps process records stored in a json file which is processed through configured processor then pushed to the dataset account of the user.
-
-#### Configuration
-
-```
 
 ```
 
 ## Processors/Procs
 
-Dataset employs the idea of processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
+GeckoDataset employs the idea of processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
 
 #### Javascript
 
 The type of processor is based on the usage of javascript file, which exposes a function which would be called to transform the provided json of incoming records into desired format, which then is transformed into json then is returned to the dataset system which umarshals and attempts to save into user's Geckboard dataset account.
 
-Dataset uses [Otto](https://github.com/robertkrimen/otto
-) which is a golang javascript runtime for executing javascript, it does not support event loops based functions like those of `setInterval` and `setTimeout`, but does provide support for majority of the javascript runtime code. See project page for more details.
+GeckoDataset uses [Otto](https://github.com/robertkrimen/otto) which is a golang javascript runtime for executing javascript, it does not support event loops based functions like those of `setInterval` and `setTimeout`, but does provide support for majority of the javascript runtime code. See project page for more details.
 
 #### Binaries
 

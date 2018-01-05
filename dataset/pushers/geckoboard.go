@@ -6,8 +6,8 @@ import (
 
 	"strings"
 
-	"github.com/influx6/dataset/dataset/config"
 	"github.com/influx6/geckoclient"
+	"github.com/influx6/geckodataset/dataset/config"
 )
 
 // GeckoboardPusher implements the Pusher interface for sending data to the
@@ -20,8 +20,8 @@ type GeckoboardPusher struct {
 }
 
 // NewGeckoboardPusher returns a new instance of GeckoboardPusher.
-func NewGeckoboardPusher(conf config.DatasetConfig) (GeckoboardPusher, error) {
-	client, err := geckoclient.New(conf.APIKey)
+func NewGeckoboardPusher(apiKey string, conf config.DatasetConfig) (GeckoboardPusher, error) {
+	client, err := geckoclient.New(apiKey)
 	if err != nil {
 		return GeckoboardPusher{}, err
 	}
@@ -51,7 +51,7 @@ func (gh GeckoboardPusher) FindOrCreate(ctx context.Context) error {
 // Push takes incoming map of records which will be the transformed data received
 // from the a Proc.
 func (gh GeckoboardPusher) Push(ctx context.Context, recs ...map[string]interface{}) error {
-	return gh.Client.PushData(ctx, gh.Config.Dataset, geckoclient.Dataset{
+	return gh.Client.ReplaceData(ctx, gh.Config.Dataset, geckoclient.Dataset{
 		Data: recs,
 	})
 }

@@ -6,11 +6,11 @@ import (
 
 	"context"
 
-	"github.com/influx6/dataset/dataset/config"
-	"github.com/influx6/dataset/dataset/procs/binary"
 	"github.com/influx6/faux/metrics"
 	"github.com/influx6/faux/metrics/custom"
 	"github.com/influx6/faux/tests"
+	"github.com/influx6/geckodataset/dataset/config"
+	"github.com/influx6/geckodataset/dataset/procs/binary"
 )
 
 func TestBinaryRun(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/influx6/dataset/dataset"
 	"github.com/influx6/faux/tests"
+	"github.com/influx6/geckodataset/dataset"
 )
 
 func TestDataset(t *testing.T) {
