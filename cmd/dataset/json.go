@@ -6,25 +6,18 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
+	"context"
+
 	"github.com/influx6/dataset/dataset"
 	"github.com/influx6/dataset/dataset/config"
 	"github.com/influx6/dataset/dataset/procs/binary"
 	"github.com/influx6/dataset/dataset/procs/jsotto"
 	"github.com/influx6/dataset/dataset/pullers/jsonfiles"
 	"github.com/influx6/dataset/dataset/pushers"
-	"github.com/influx6/faux/flags"
 	"github.com/influx6/faux/metrics"
 )
 
-func jsonAction(context flags.Context) error {
-	configFile, _ := context.GetString("config")
-
-	var conf jsonConfig
-	if err := conf.Load(configFile); err != nil {
-		return err
-	}
-
+func runDataset(ctx context.Context, conf jsonDataset, base config.ProcConfig) error {
 	geckoboard, err := pushers.NewGeckoboardPusher(conf.Dataset)
 	if err != nil {
 		return err
@@ -59,7 +52,7 @@ func jsonAction(context flags.Context) error {
 
 	for {
 		// Seek new batch for processing.
-		if err := controller.Do(context, conf.PullBatch, conf.PushBatch); err != nil {
+		if err := controller.Do(ctx, base.PullBatch, base.PushBatch); err != nil {
 			if err == dataset.ErrNoMore {
 				return nil
 			}
@@ -68,33 +61,21 @@ func jsonAction(context flags.Context) error {
 		}
 
 		// Sleep for giving duration after last run of pull-process-push routine.
-		time.Sleep(conf.RunInterval)
+		time.Sleep(base.RunInterval)
 	}
-
-	return nil
 }
 
-// jsonConfig embodies the configuration expected to be loaded
-// by user for processing a collection which would then be
-// saved to the Geckoboard API.
-type jsonConfig struct {
-	config.ProcConfig
+// jsonDataset defines json dataset requests for
+// specific file.
+type jsonDataset struct {
+	config.DriverConfig
 	Source  string               `toml:"source"`
 	Dataset config.DatasetConfig `toml:"datasets"`
 }
 
-// Load attempts to use toml to decode file content into Config instance.
-func (c *jsonConfig) Load(targetFile string) error {
-	if _, err := toml.DecodeFile(targetFile, c); err != nil {
-		return err
-	}
-
-	return c.Validate()
-}
-
 // Validate returns an error if the config is invalid.
-func (c *jsonConfig) Validate() error {
-	if err := c.ProcConfig.Validate(); err != nil {
+func (c *jsonDataset) Validate() error {
+	if err := c.DriverConfig.Validate(); err != nil {
 		return err
 	}
 

@@ -23,20 +23,47 @@ const (
 	DefaultInterval = time.Second * 60
 )
 
-// ProcConfig embodies the configuration used for defining user configuration
-// for the proc processors who handle conversion of data to datastore records.
-type ProcConfig struct {
+// DriverConfig embodies the configuration used for defining user driver processor.
+type DriverConfig struct {
 	// JS indicates the configuration values for the JSOtto procs.
 	JS *JSOttoConf `toml:"js"`
 
 	// Binary indicates the configuration values to be used for the BinaryRunc procs.
 	Binary *BinaryConf `toml:"binary"`
 
-	// Pull, process and update record at giving intervals. (Optional)
-	Interval string `toml:"interval"`
-
 	// Driver value indicates which proc is to be used for processing: js or binary.
 	Driver string `toml:"driver"`
+}
+
+// Validate returns an error if the config is invalid.
+func (dc *DriverConfig) Validate() error {
+	if dc.Binary == nil && dc.JS == nil {
+		return errors.New("ProcConfig.JS or ProcConfig.Binary must either be provided")
+	}
+
+	if dc.JS != nil {
+		if err := dc.JS.Validate(); err != nil {
+			return err
+		}
+	}
+
+	if dc.Binary != nil {
+		if err := dc.Binary.Validate(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ProcConfig embodies the configuration used for defining user configuration
+// for the proc processors who handle conversion of data to datastore records.
+type ProcConfig struct {
+	// APIKey indicates the user's Geckoboard API Key used for authentication of all save requests.
+	APIKey string `toml:"api_key"`
+
+	// Pull, process and update record at giving intervals. (Optional)
+	Interval string `toml:"interval"`
 
 	// PullBatch indicates total records expected by proc to be processed.
 	PullBatch int `toml:"pull_batch"`
@@ -61,28 +88,16 @@ func (dc *ProcConfig) Validate() error {
 		dc.RunInterval = DefaultInterval
 	}
 
+	if dc.APIKey == "" {
+		return errors.New("APIKey is required")
+	}
+
 	if dc.PullBatch <= 0 {
 		dc.PullBatch = DefaultPullBatch
 	}
 
 	if dc.PushBatch <= 0 {
 		dc.PushBatch = DefaultPushBatch
-	}
-
-	if dc.Binary == nil && dc.JS == nil {
-		return errors.New("ProcConfig.JS or ProcConfig.Binary must either be provided")
-	}
-
-	if dc.JS != nil {
-		if err := dc.JS.Validate(); err != nil {
-			return err
-		}
-	}
-
-	if dc.Binary != nil {
-		if err := dc.Binary.Validate(); err != nil {
-			return err
-		}
 	}
 
 	return nil
@@ -102,9 +117,6 @@ type DatasetConfig struct {
 	// Dataset indicates the dataset to be used for saving processed results.
 	Dataset string `toml:"dataset"`
 
-	// APIKey indicates the user's Geckoboard API Key used for authentication of all save requests.
-	APIKey string `toml:"api_key"`
-
 	// Fields indicates the fields defining the dataset which is expected to be used
 	// for storing the processed records.
 	Fields []FieldType `toml:"fields"`
@@ -112,10 +124,6 @@ type DatasetConfig struct {
 
 // Validate returns an error if the config is invalid.
 func (dc *DatasetConfig) Validate() error {
-	if dc.APIKey == "" {
-		return errors.New("APIKey is required")
-	}
-
 	if dc.Dataset == "" {
 		return errors.New("Dataset name is required")
 	}

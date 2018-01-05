@@ -14,10 +14,80 @@ go get -u github.com/influx6/dataset/...
 
 ## Commands
 
-#### `mgo`
+Each command below expects to be provided a path to a config file which will be used to configure different areas and need of command. 
+
+*Dataset relies on [Toml](https://github.com/toml-lang/toml) for it's configuration.*
+
+### `mgo`
+
+`mgo` is a command which helps process records stored within a mongodb database collection which is processed through configured processor then pushed to the dataset account of the user.
+
+#### Configuration
+
+- JS Processors
+
+```
+api_key: your_api_key
+interval: 60s
+pull_batch: 100
+push_batch: 100
+
+[[datasets]]
+driver: js
+dataset: "user_sales_score"
+source: "./scores/user_sales.json"
+
+	[[datasets.js]]
+	target: transformDocument
+	main: "./transforms/js/user_sales.js"
+	libraries: ["./assets/js/support/types.js"]
+
+	[[datasets.dataset]]
+	dataset: "user_sales_freq"
+		
+	[[datasets.dataset.fields]]
+	name: "user"
+	type: string
+
+	[[datasets.dataset.fields]]
+	name: "scores"
+	type: number
 
 
-#### `mgo`
+```
+
+- Binary Processors
+
+```
+interval: 60s
+driver: js
+
+[source]
+
+[dataset]
+	
+
+```
+
+### `json-dir`
+
+`json-dir` is a command which helps process records stored within a directory of json files which is processed through configured processor then pushed to the dataset account of the user.
+
+#### Configuration
+
+```
+
+```
+
+### `json-file`
+
+`json-file` is a command which helps process records stored in a json file which is processed through configured processor then pushed to the dataset account of the user.
+
+#### Configuration
+
+```
+
+```
 
 ## Processors/Procs
 
@@ -26,6 +96,9 @@ Dataset employs the idea of processors termed `procs` which provided functions i
 #### Javascript
 
 The type of processor is based on the usage of javascript file, which exposes a function which would be called to transform the provided json of incoming records into desired format, which then is transformed into json then is returned to the dataset system which umarshals and attempts to save into user's Geckboard dataset account.
+
+Dataset uses [Otto](https://github.com/robertkrimen/otto
+) which is a golang javascript runtime for executing javascript, it does not support event loops based functions like those of `setInterval` and `setTimeout`, but does provide support for majority of the javascript runtime code. See project page for more details.
 
 #### Binaries
 
