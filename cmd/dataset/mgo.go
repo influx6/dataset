@@ -26,7 +26,7 @@ func mgoAction(context flags.Context) error {
 		return err
 	}
 
-	geckoboard, err := pushers.NewGeckoboardPusher(conf.Datasets)
+	geckoboard, err := pushers.NewGeckoboardPusher(conf.Dataset)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,6 @@ func mgoAction(context flags.Context) error {
 	mdb := mongo.NewMongoDB(conf.Source)
 
 	var transformer dataset.Proc
-
 	switch strings.ToLower(conf.Driver) {
 	case "js", "jsotto":
 		jso, err := jsotto.New(*conf.JS)
@@ -54,8 +53,8 @@ func mgoAction(context flags.Context) error {
 	pushers = append(pushers, geckoboard)
 
 	controller := dataset.Dataset{
-		Pushers: pushers,
 		Pull:    puller,
+		Pushers: pushers,
 		Proc:    transformer,
 	}
 
@@ -81,9 +80,9 @@ func mgoAction(context flags.Context) error {
 // saved to the Geckoboard API.
 type mgoConfig struct {
 	config.ProcConfig
-	Dest     *mongo.Config        `toml:"dest"`
-	Source   mongo.Config         `toml:"source"`
-	Datasets config.DatasetConfig `toml:"datasets"`
+	Dest    *mongo.Config        `toml:"dest"`
+	Source  mongo.Config         `toml:"source"`
+	Dataset config.DatasetConfig `toml:"datasets"`
 }
 
 // Load attempts to use toml to decode file content into Config instance.
@@ -124,7 +123,7 @@ func (c *mgoConfig) Validate() error {
 		}
 	}
 
-	if err := c.Datasets.Validate(); err != nil {
+	if err := c.Dataset.Validate(); err != nil {
 		return fmt.Errorf("dataset %+q: %+s", ds.Dataset, err.Error())
 	}
 

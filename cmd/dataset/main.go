@@ -17,8 +17,19 @@ func main() {
 			},
 		},
 	}, flags.Command{
-		Name:      "json",
+		Name:      "json-file",
 		Action:    jsonAction,
+		ShortDesc: "Push data from a file to the geckoboard API",
+		Desc:      `json allows pushing data from a json file which are processed using the dataset system then pushed to user's Geckoboard API account`,
+		Flags: []flags.Flag{
+			&flags.StringFlag{
+				Name:    "config",
+				Default: "config.toml",
+			},
+		},
+	}, flags.Command{
+		Name:      "json-dir",
+		Action:    jsonDirAction,
 		ShortDesc: "Push data from a directory of json files to the geckoboard API",
 		Desc:      `json allows pushing data from a collection of json files which are processed using the dataset system then pushed to user's Geckoboard API account`,
 		Flags: []flags.Flag{

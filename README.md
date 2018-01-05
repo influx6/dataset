@@ -14,17 +14,22 @@ go get -u github.com/influx6/dataset/...
 
 ## Commands
 
-#### `mgo-dataset`
+#### `mgo`
 
 
-## Procs
+#### `mgo`
 
-MgoDataset employs the idea of processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
+## Processors/Procs
+
+Dataset employs the idea of processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
 
 #### Javascript
 
+The type of processor is based on the usage of javascript file, which exposes a function which would be called to transform the provided json of incoming records into desired format, which then is transformed into json then is returned to the dataset system which umarshals and attempts to save into user's Geckboard dataset account.
+
 #### Binaries
 
+This type of processor is based on the the usage of executable binary, which either is written to read from stdin a json of a record list or has a function which reads from stdin a json of record list, which will process and return appropriate json list containing the formated records which then is pushed up to the Geckboard user's dataset account.
 
 ## Disclaimer
 
