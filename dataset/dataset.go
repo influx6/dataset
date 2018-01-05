@@ -2,6 +2,13 @@ package dataset
 
 import (
 	"context"
+	"errors"
+)
+
+// errors ...
+var (
+	ErrNoMore   = errors.New("no more records available")
+	ErrBatchLen = errors.New("invalid batch length received")
 )
 
 // Proc defines an interface which embodies a a processor of
@@ -53,9 +60,18 @@ type Dataset struct {
 // from the the puller and processed, if an error occured, then that error will be
 // returned.
 func (ds Dataset) Do(ctx context.Context, pullBatch int, pushBatch int) error {
+	if pullBatch <= 0 || pushBatch <= 0 {
+		return ErrBatchLen
+	}
+
 	recs, err := ds.Pull.Pull(ctx, pullBatch)
 	if err != nil {
 		return err
+	}
+
+	// if pull returns zero then we are probably done pulling, so return no more.
+	if len(recs) == 0 {
+		return ErrNoMore
 	}
 
 	procRecs, err := ds.Proc.Transform(ctx, recs...)

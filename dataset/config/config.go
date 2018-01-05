@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 )
 
@@ -28,26 +27,26 @@ const (
 // for the proc processors who handle conversion of data to datastore records.
 type ProcConfig struct {
 	// JS indicates the configuration values for the JSOtto procs.
-	JS JSOttoConf `toml:"js" yaml:"js"`
+	JS *JSOttoConf `toml:"js"`
 
 	// Binary indicates the configuration values to be used for the BinaryRunc procs.
-	Binary BinaryConf `toml:"binary" yaml:"binary"`
+	Binary *BinaryConf `toml:"binary"`
 
 	// Pull, process and update record at giving intervals. (Optional)
-	Interval string `toml:"interval" yaml:"interval"`
+	Interval string `toml:"interval"`
 
 	// Driver value indicates which proc is to be used for processing: js or binary.
-	Driver string `toml:"driver" yaml:"driver"`
+	Driver string `toml:"driver"`
 
 	// PullBatch indicates total records expected by proc to be processed.
-	PullBatch int `toml:"pull_batch" yaml:"pullbatch"`
+	PullBatch int `toml:"pull_batch"`
 
 	// PushBatch indicates total records to be pushed per call to the upstream API.
-	PushBatch int `toml:"pull_batch" yaml:"pushbatch"`
+	PushBatch int `toml:"pull_batch"`
 
 	// RunInterval gets the interval value provided through the `Interval` field or
 	// is set to DefaultInterval.
-	RunInterval time.Duration `toml:"-" yaml:"-"`
+	RunInterval time.Duration `toml:"-"`
 }
 
 // Validate returns an error if the config is invalid.
@@ -70,11 +69,20 @@ func (dc *ProcConfig) Validate() error {
 		dc.PushBatch = DefaultPushBatch
 	}
 
-	switch strings.ToLower(dc.Driver) {
-	case "jsotto", "js":
-		return dc.JS.Validate()
-	case "binary":
-		return dc.Binary.Validate()
+	if dc.Binary == nil && dc.JS == nil {
+		return errors.New("ProcConfig.JS or ProcConfig.Binary must either be provided")
+	}
+
+	if dc.JS != nil {
+		if err := dc.JS.Validate(); err != nil {
+			return err
+		}
+	}
+
+	if dc.Binary != nil {
+		if err := dc.Binary.Validate(); err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -82,7 +90,7 @@ func (dc *ProcConfig) Validate() error {
 
 // FieldType embodies field values for defining dataset field types.
 type FieldType struct {
-	Name     string `toml:"name" yaml:"name"`
+	Name     string `toml:"name"`
 	Type     string `toml:"type"`
 	Currency string `toml:"currency"`
 	Optional bool   `toml:"optional"`
