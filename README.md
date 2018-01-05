@@ -59,22 +59,22 @@ api_key = "your_api_key"
 [[datasets]]
 driver = "json-file"
 
-	[datasets.conf]
-	dataset = "user_sales_freq"
-	source = "./fixtures/sales/user_sales.json"
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "./fixtures/sales/user_sales.json"
 
-	[datasets.conf.js]
-	target = "transformDocument"
-	main = "./fixtures/transforms/js/user_sales.js"
-	libraries = ["./fixtures/transforms/js/support/types.js"]
+[datasets.conf.js]
+target = "transformDocument"
+main = "./fixtures/transforms/js/user_sales.js"
+libraries = ["./fixtures/transforms/js/support/types.js"]
 
-	[[datasets.conf.fields]]
-	name = "user"
-	type = "string"
+[[datasets.conf.fields]]
+name = "user"
+type = "string"
 
-	[[datasets.conf.fields]]
-	name = "scores"
-	type = "number"
+[[datasets.conf.fields]]
+name = "scores"
+type = "number"
 ```
 
 - Using Javascript Processor with MongoDB source
@@ -89,30 +89,30 @@ api_key = "your_api_key"
 [[datasets]]
 driver = "mongodb"
 
-	[datasets.conf]
-	dataset = "user_sales_freq"
-	source = "user_sales_collection"
-	dest = "user_sales_metrics" # optional, we want to save transformed records here
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "user_sales_collection"
+dest = "user_sales_metrics" # optional, we want to save transformed records here
 
-	[datasets.conf.db]
-	authdb = "admin"
-	db = "machines_sales"
-	user = "tobi_mach"
-	password = "xxxxxxxxxxxx"
-	host = "db.mongo.com:4500"
+[datasets.conf.db]
+authdb = "admin"
+db = "machines_sales"
+user = "tobi_mach"
+password = "xxxxxxxxxxxx"
+host = "db.mongo.com:4500"
 
-	[datasets.conf.js]
-	target = "transformDocument"
-	main = "./fixtures/transforms/js/user_sales.js"
-	libraries = ["./fixtures/transforms/js/support/types.js"]
+[datasets.conf.js]
+target = "transformDocument"
+main = "./fixtures/transforms/js/user_sales.js"
+libraries = ["./fixtures/transforms/js/support/types.js"]
 
-	[[datasets.conf.fields]]
-	name = "user"
-	type = "string"
+[[datasets.conf.fields]]
+name = "user"
+type = "string"
 
-	[[datasets.conf.fields]]
-	name = "scores"
-	type = "number"
+[[datasets.conf.fields]]
+name = "scores"
+type = "number"
 ```
 
 - Binary Processor with JSON source file
@@ -126,22 +126,22 @@ api_key = "your_api_key"
 [[datasets]]
 driver = "json-file"
 
-	[datasets.conf]
-	dataset = "user_sales_freq"
-	source = "./fixtures/sales/user_sales.json"
+[datasets.conf]
+dataset = "user_sales_freq"
+source = "./fixtures/sales/user_sales.json"
 
-	[datasets.conf.js]
-	target = "transformDocument"
-	main = "./fixtures/transforms/js/user_sales.js"
-	libraries = ["./fixtures/transforms/js/support/types.js"]
+[datasets.conf.js]
+target = "transformDocument"
+main = "./fixtures/transforms/js/user_sales.js"
+libraries = ["./fixtures/transforms/js/support/types.js"]
 
-	[[datasets.conf.fields]]
-	name = "user"
-	type = "string"
+[[datasets.conf.fields]]
+name = "user"
+type = "string"
 
-	[[datasets.conf.fields]]
-	name = "scores"
-	type = "number"
+[[datasets.conf.fields]]
+name = "scores"
+type = "number"
 ```
 
 - Using Binary Processor with MongoDB source
@@ -161,27 +161,24 @@ dataset = "user_sales_freq"
 source = "user_sales_collection"
 dest = "user_sales_metrics" # optional, we want to save transformed records here
 
-	# set fields that dataset must have
+[datasets.conf.db]
+authdb = "admin"
+db = "machines_sales"
+user = "tobi_mach"
+password = "xxxxxxxxxxxx"
+host = "db.mongo.com:4500"
 
-	[[datasets.conf.fields]]
-	name = "user"
-	type = "string"
+[datasets.conf.binary]
+binary = "echo"
 
-	[[datasets.conf.fields]]
-	name = "scores"
-	type = "number"
+# set fields that dataset must have
+[[datasets.conf.fields]]
+name = "user"
+type = "string"
 
-
-	[datasets.conf.db]
-	authdb = "admin"
-	db = "machines_sales"
-	user = "tobi_mach"
-	password = "xxxxxxxxxxxx"
-	host = "db.mongo.com:4500"
-
-	[datasets.conf.binary]
-	binary = "echo"
-
+[[datasets.conf.fields]]
+name = "scores"
+type = "number"
 ```
 
 ## Processors/Procs
