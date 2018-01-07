@@ -11,6 +11,18 @@ It provides a more involved approach to the transformation of incoming data whic
 go get -u github.com/influx6/geckodataset/...
 ```
 
+## Tests
+
+To run integration test `TestJavascriptPushIntegration` in `./cmd/geckoboard-dataset`, you need to provided a test API Authentication key as an environment variable `GECKOBOARD_TEST_KEY`.
+
+```bash
+> cd ./cmd/geckoboard-dataset
+
+> GECKOBOARD_TEST_KEY="222efc82e7933138077b1c2554439e15" go test -v -run TestJavascriptPushIntegration
+```
+
+*All other tests do not need the environment variable.*
+
 ## Run
 
 GeckoDataset provides a CLI tooling called `geckoboard-dataset` which is central means of using the project:
@@ -205,6 +217,8 @@ The CLI tool will make the necessary calls by relying on `/bin/sh` with the foll
 
 
 Listing below are different configuration for usage of the geckodataset CLI tooling for sourcing data either through a [MongoDB](htts://mongodb.com) database collection or through a json file or directory, using the YAML format (See [TOML Format](./config/toml.md) for toml version). 
+
+*Be careful in Yaml not to use tabs but spaces, has it gets troublesome*
 
 - Using Javascript Processor with JSON source file
 

@@ -3,12 +3,26 @@ package main
 import (
 	"bytes"
 	"context"
+	"html/template"
 	"io/ioutil"
 	"strings"
+
+	"os"
+
+	"strconv"
 
 	"github.com/BurntSushi/toml"
 	"github.com/ghodss/yaml"
 	"github.com/influx6/geckodataset/dataset/config"
+)
+
+var (
+	tmplFuncs = template.FuncMap{
+		"quote": strconv.Quote,
+		"env": func(name string) string {
+			return strings.TrimSpace(os.Getenv(name))
+		},
+	}
 )
 
 type datasetList struct {
@@ -32,8 +46,18 @@ type lConfig struct {
 // loadYAMLConfig returns a datasetList which is generated from the provided yaml config
 // string returning appropriate config structures.
 func loadYAMLConfig(ctx context.Context, configData string) (datasetList, error) {
+	var formatted bytes.Buffer
+	tml, err := template.New("geckodataset-yaml-config").Funcs(tmplFuncs).Parse(configData)
+	if err != nil {
+		return datasetList{}, err
+	}
+
+	if err := tml.Execute(&formatted, nil); err != nil {
+		return datasetList{}, err
+	}
+
 	var con lConfig
-	if err := yaml.Unmarshal([]byte(configData), &con); err != nil {
+	if err := yaml.Unmarshal(formatted.Bytes(), &con); err != nil {
 		return datasetList{}, err
 	}
 
@@ -104,32 +128,24 @@ func pushYAMLDatasets(ctx context.Context, configFile string) error {
 		return err
 	}
 
-	for _, conf := range config.Mongo {
-		if err := runMGODataset(ctx, conf.DatasetConfig, conf, config.Config); err != nil {
-			return err
-		}
-	}
-
-	for _, conf := range config.JSONFiles {
-		if err := runJSONDataset(ctx, conf.DatasetConfig, conf, config.Config); err != nil {
-			return err
-		}
-	}
-
-	for _, conf := range config.JSONDirs {
-		if err := runJSONDirDataset(ctx, conf.DatasetConfig, conf, config.Config); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return runDatasetConfig(ctx, config)
 }
 
 // loadTOMLConfig returns a datasetList which is generated from the provided toml config
 // string returning appropriate config structures.
 func loadTOMLConfig(ctx context.Context, configData string) (datasetList, error) {
+	var formatted bytes.Buffer
+	tml, err := template.New("geckodataset-toml-config").Funcs(tmplFuncs).Parse(configData)
+	if err != nil {
+		return datasetList{}, err
+	}
+
+	if err := tml.Execute(&formatted, nil); err != nil {
+		return datasetList{}, err
+	}
+
 	var config lConfig
-	if _, err := toml.Decode(configData, &config); err != nil {
+	if _, err := toml.Decode(formatted.String(), &config); err != nil {
 		return datasetList{}, err
 	}
 
@@ -201,6 +217,10 @@ func pushTOMLDatasets(ctx context.Context, configFile string) error {
 		return err
 	}
 
+	return runDatasetConfig(ctx, config)
+}
+
+func runDatasetConfig(ctx context.Context, config datasetList) error {
 	for _, conf := range config.Mongo {
 		if err := runMGODataset(ctx, conf.DatasetConfig, conf, config.Config); err != nil {
 			return err

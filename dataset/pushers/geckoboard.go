@@ -3,6 +3,7 @@ package pushers
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"strings"
 
@@ -16,7 +17,6 @@ type GeckoboardPusher struct {
 	created bool
 	Client  geckoclient.Client
 	Config  config.DatasetConfig
-	NewSet  *geckoclient.NewDataset
 }
 
 // NewGeckoboardPusher returns a new instance of GeckoboardPusher.
@@ -32,25 +32,20 @@ func NewGeckoboardPusher(apiKey string, conf config.DatasetConfig) (GeckoboardPu
 		return GeckoboardPusher{}, err
 	}
 
+	if err := client.Create(context.Background(), conf.Dataset, set); err != nil {
+		return GeckoboardPusher{}, err
+	}
+
 	return GeckoboardPusher{
 		Config: conf,
 		Client: client,
-		NewSet: &set,
 	}, nil
-}
-
-// FindOrCreate attempts to create pushers dataset if the pusher has an associated
-// NewDataSet field value which indicates need to create set if not existing.
-func (gh GeckoboardPusher) FindOrCreate(ctx context.Context) error {
-	if gh.NewSet == nil {
-		return nil
-	}
-	return gh.Client.Create(ctx, gh.Config.Dataset, *gh.NewSet)
 }
 
 // Push takes incoming map of records which will be the transformed data received
 // from the a Proc.
 func (gh GeckoboardPusher) Push(ctx context.Context, recs ...map[string]interface{}) error {
+	fmt.Printf("Sending: %+q\n", recs)
 	return gh.Client.ReplaceData(ctx, gh.Config.Dataset, geckoclient.Dataset{
 		Data: recs,
 	})
@@ -58,6 +53,7 @@ func (gh GeckoboardPusher) Push(ctx context.Context, recs ...map[string]interfac
 
 func transformFields(fields []config.FieldType) (geckoclient.NewDataset, error) {
 	var set geckoclient.NewDataset
+	set.Fields = map[string]geckoclient.DataType{}
 
 	for _, desc := range fields {
 		if desc.Name == "" {
