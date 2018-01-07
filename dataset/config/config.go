@@ -22,7 +22,7 @@ const (
 
 	// DefaultInterval indicates the default expected time for each
 	// requests to be processed before waiting for it's next run.
-	DefaultInterval = time.Second * 60
+	DefaultInterval = time.Second * 5
 )
 
 // DriverConfig embodies the configuration used for defining user driver processor.

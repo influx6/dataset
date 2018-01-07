@@ -1,8 +1,8 @@
 GeckoDataset
 ----------------
-GeckoDataset is a project similar to the [Sql-Dataset](https://github.com/geckoboard/sql-dataset) library, which allows the exporting of collection data into your Geckobaord account's dataset using a combination of processors, pullers and pushers.
+GeckoDataset is a project similar to the [Sql-Dataset](https://github.com/geckoboard/sql-dataset) library, which allows the exporting of collection record into your Geckobaord account's dataset using a combination of processors, pullers and pushers.
 
-It provides a more involved approach to the transformation of incoming data which then gets saved into a dataset of your choosing on your Geckoboard API account. It takes this approach to both allow flexibility and user control of what the data gets transformed to, in both shape and form. 
+It provides a more involved approach to the transformation of incoming data which then gets saved into a dataset of your choosing on your Geckoboard API account. It takes this approach to both allow flexibility and user control of what the data gets transformed into, in both shape and form. 
 
 
 ## Install
@@ -33,7 +33,7 @@ To go further, after running `TestJavascriptPushIntegration`, you can go to your
 
 ## Run
 
-GeckoDataset provides a CLI tooling called `geckoboard-dataset` which is central means of using the project:
+GeckoDataset provides a CLI (Command Line) tool called `geckoboard-dataset`:
 
 ```bash
 > geckoboard-dataset 
@@ -55,7 +55,7 @@ Usage: dataset [flags] [command]
 
 ```
 
-It which exposes a `push` command which handles the necessary logic to process provided configuration for the retrieval, transformation and update of dataset data.
+It which exposes a `push` command, which handles the necessary logic to process provided configuration for the retrieval, transformation and update of dataset data.
 
 ```bash
 > geckoboard-dataset push -config config.toml
@@ -63,24 +63,24 @@ It which exposes a `push` command which handles the necessary logic to process p
 
 ## Transformers (Procs)
 
-GeckoDataset employs the idea of transformers/processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
+GeckoDataset employs the idea of transformers/processors termed `procs`, which provide functions internally that will take a batch of records from the source and returns appropriate JSON response which will be stored into the user's Geckoboard dataset account.
 
 #### Javascript
 
-The type of processor is based on the usage of javascript file, which exposes a function which would be called to transform the provided json of incoming records into desired format, which then is transformed into json then is returned to the dataset system which umarshals and attempts to save into user's Geckboard dataset account.
+This type of transformer is based on the usage of javascript function in a loaded javascript file to transform the provided json of records into the desired shape and form, which then is saved into the datasets account of user.
 
-GeckoDataset uses [Otto](https://github.com/robertkrimen/otto) which is a golang javascript runtime for executing javascript, it does not support event loops based functions like those of `setInterval` and `setTimeout`, but does provide support for majority of the javascript runtime code. See project page for more details.
+GeckoDataset uses [Otto](https://github.com/robertkrimen/otto), which is a Go/Golang Javascript runtime, it does not provide support for event loops using functions like `setInterval` and `setTimeout`, but does provide support for majority of the javascript language specification. See project page for more details.
 
 #### Binaries
 
-This type of processor is based on the the usage of executable binary, which either is written to read from stdin a json of a record list or has a function which reads from stdin a json of record list, which will process and return appropriate json list containing the formated records which then is pushed up to the Geckboard user's dataset account.
+This type of processor is based on the use of a executable binary, which reads or has a command which will be called that reads from standard input or stdin a payload of json containing a array of records, which will be processed and return appropriate json containing the formated records, which then is written to standard output or stdout.
 
 
 ## Configuration
 
 GeckoDataset supports configuration using either [Yaml](https://github.com/ghodss/yaml) or [TOML](https://github.com/toml-lang/toml) files.
 
-Listing below are different configuration for usage of the geckodataset CLI tooling for sourcing data either through a [MongoDB](htts://mongodb.com) database collection or through a json file or directory, using the YAML format (See [TOML Format](./config/toml.md) for toml version). 
+Listed below are different configurations for usage of the geckodataset CLI for sourcing data either through a [MongoDB](htts://mongodb.com) database collection or through a json file or directory, using the YAML format (See [TOML Format](./config/toml.md) for toml version). 
 
 *Be careful in Yaml not to use tabs but spaces, has it gets troublesome*
 
@@ -231,17 +231,17 @@ This is required to state the Geckobaord's api authentication key.
 
 #### pull_batch and push_batch
 
-These pair of values dictate the total amount of records to be pulled from the source which then will be processed, and also the total amount of records to be pushed to the Geckoboard API from what was pulled and processed. If the `push_batch` value is lower than the `pull_batch`, then the CLI attempts to split the pulled records into giving `push_batch` sections, which then all get pushed to the API individually.
+These pair of values dictate the total amount of records to be pulled from the source which then will be processed, and also the total amount of records to be pushed to the Geckoboard API from what was pulled and processed. If the `push_batch` value is lower than the `pull_batch`, then the CLI attempts to split the pulled records into giving `push_batch` length, which then all get pushed to the API individually.
 
-*These config paramters is optional*
+*These config parameters is optional*
 *Defaults to 500, similar to Geckoboard data push limit.*
 
 #### interval
 
-Allows setting the interval used by the CLI for updating datasets record after processing, because Geckoboard API has a limit on the total amount of records which can be pushed to the API per minute, this values helps to mitigate and reduce the hits against the API for the user's account. 
+Allows setting the interval used by the CLI for updating dataset records after processing, because Geckoboard API has a limit on the total amount of records which can be pushed to the API per minute, this values helps to mitigate and reduce the hits against the API for the user's account. 
 
 *These config paramters is optional*
-*Defaults to 60s*
+*Defaults to 5s*
 
 
 ### Datasets Configuration
