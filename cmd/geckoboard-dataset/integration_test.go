@@ -17,6 +17,7 @@ push_batch: 3
 api_key: {{ env "GECKOBOARD_TEST_KEY" }}
 datasets:
  - driver: "json-file"
+   op: push
    dataset: "user_sales_freq"
    fields:
     - name: user

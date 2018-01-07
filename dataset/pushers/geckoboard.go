@@ -3,7 +3,6 @@ package pushers
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"strings"
 
@@ -32,6 +31,7 @@ func NewGeckoboardPusher(apiKey string, conf config.DatasetConfig) (GeckoboardPu
 		return GeckoboardPusher{}, err
 	}
 
+	set.UniqueBy = conf.UniqueBy
 	if err := client.Create(context.Background(), conf.Dataset, set); err != nil {
 		return GeckoboardPusher{}, err
 	}
@@ -42,13 +42,33 @@ func NewGeckoboardPusher(apiKey string, conf config.DatasetConfig) (GeckoboardPu
 	}, nil
 }
 
+// Replace takes incoming map of records which will be the transformed data received
+// from the a Proc.
+func (gh GeckoboardPusher) Update(ctx context.Context, recs ...map[string]interface{}) error {
+	return gh.Client.ReplaceData(ctx, gh.Config.Dataset, geckoclient.Dataset{
+		Data:     recs,
+		DeleteBy: gh.Config.DeteletBy,
+	})
+}
+
 // Push takes incoming map of records which will be the transformed data received
 // from the a Proc.
-func (gh GeckoboardPusher) Push(ctx context.Context, recs ...map[string]interface{}) error {
-	fmt.Printf("Sending: %+q\n", recs)
-	return gh.Client.ReplaceData(ctx, gh.Config.Dataset, geckoclient.Dataset{
+func (gh GeckoboardPusher) Add(ctx context.Context, recs ...map[string]interface{}) error {
+	return gh.Client.PushData(ctx, gh.Config.Dataset, geckoclient.Dataset{
 		Data: recs,
 	})
+}
+
+// Send uses the operation flag from the config to send giving records to the Geckoboard's dataset API.
+func (gh GeckoboardPusher) Push(ctx context.Context, recs ...map[string]interface{}) error {
+	switch strings.ToLower(gh.Config.Op) {
+	case "push":
+		return gh.Add(ctx, recs...)
+	case "update":
+		return gh.Update(ctx, recs...)
+	default:
+		return errors.New("unknown operation type")
+	}
 }
 
 func transformFields(fields []config.FieldType) (geckoclient.NewDataset, error) {

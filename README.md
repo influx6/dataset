@@ -101,6 +101,30 @@ These paramter is used to set the name of the dataset which would be saved into 
 dataset: user_sales_frequency
 ```
 
+#### op
+
+These paramter is used to set the operation to be done with the records either they will be pushed as new records or used to update/replace existing records on the datasets Geckoboard API. It can only ever have two values: `push` or `update`.
+
+```yaml
+op: push
+```
+
+#### unique_by
+
+These paramter is used to set unique field names which are used when creating new dataset.
+
+```yaml
+unique_by: [user, sale]
+```
+
+#### delete_by
+
+These paramter is used to set field names which are used when updating old dataset to delete .
+
+```yaml
+delete_by: [user]
+```
+
 #### fields
 
 These parameter is provides an array of field types which is supported by the Geckoboard API. Incase the dataset is yet to exists, then the initital call of the CLI tool would be to create the dataset with the provided field configuration.
@@ -230,6 +254,7 @@ push_batch: 100
 api_key: your_api_key
 datasets:
  - driver: "json-file"
+   op: push
    dataset: "user_sales_freq"
    fields:
     - name: user
@@ -254,6 +279,7 @@ push_batch: 100
 api_key: your_api_key
 datasets:
  - driver: json-dir
+   op: push
    dataset: "user_sales_freq"
    fields:
     - name: user
@@ -278,6 +304,7 @@ push_batch: 100
 api_key: your_api_key
 datasets:
  - driver: mongodb
+   op: push
    dataset: user_sales_freq
    fields:
     - name: user
@@ -308,6 +335,7 @@ push_batch: 100
 api_key: your_api_key
 datasets:
  - driver: json-file
+   op: push
    dataset: "user_sales_freq"
    fields:
     - name: user
@@ -330,6 +358,7 @@ push_batch: 100
 api_key: your_api_key
 datasets:
  - driver: mongodb
+   op: push
    dataset: user_sales_freq
    fields:
     - name: user

@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -108,8 +109,17 @@ type FieldType struct {
 // DatasetConfig embodies the configuration data used to define the dataset to
 // be used and corresponding dataset field values to be used to create dataset.
 type DatasetConfig struct {
+	// Operation indicates the type of operation to be performed
+	Op string `toml:"op" json:"op"`
+
 	// Dataset indicates the dataset to be used for saving processed results.
 	Dataset string `toml:"dataset" json:"dataset"`
+
+	// UniqueBy contains unique values for creating new dataset fields.
+	UniqueBy []string `toml:"uniques" json:"unique_by"`
+
+	// DeleteBy contains values used during record updates.
+	DeteletBy []string `toml:"delete_by" json:"delete_by"`
 
 	// Fields indicates the fields defining the dataset which is expected to be used
 	// for storing the processed records.
@@ -120,6 +130,14 @@ type DatasetConfig struct {
 func (dc *DatasetConfig) Validate() error {
 	if dc.Dataset == "" {
 		return errors.New("DatasetConfig.Dataset is required")
+	}
+
+	if dc.Op == "" {
+		dc.Op = "Push"
+	}
+
+	if strings.ToLower(dc.Op) != "push" && strings.ToLower(dc.Op) != "update" {
+		return fmt.Errorf("DatasetConfig.Op can only be either 'Push' or 'Update' not %q", dc.Op)
 	}
 
 	return nil
