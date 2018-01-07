@@ -1,6 +1,6 @@
 GeckoDataset
 ----------------
-GeckoDataset is a project similar to the [Sql-Dataset](https://github.com/geckoboard/sql-dataset), which allows the exporting of collection data into your Geckobaord account's dataset using a combination of processors, pullers and pushers.
+GeckoDataset is a project similar to the [Sql-Dataset](https://github.com/geckoboard/sql-dataset) library, which allows the exporting of collection data into your Geckobaord account's dataset using a combination of processors, pullers and pushers.
 
 It provides a more involved approach to the transformation of incoming data which then gets saved into a dataset of your choosing on your Geckoboard API account. It takes this approach to both allow flexibility and user control of what the data gets transformed to, in both shape and form. 
 
