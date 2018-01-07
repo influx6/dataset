@@ -248,12 +248,11 @@ Allows setting the interval used by the CLI for updating dataset records after p
 
 These are the core configuration values which specify how the source data is to be processed and what will be used for the transformation. 
 
-Because Geckodataset supports usage of javascript or binary transformers, these will be explained with respect to each transformer.
+Because Geckodataset supports usage of javascript or binary transformers, these has been explained with respect to each transformer.
 
-*The dataset configurations starts with the `datasets`
-config key in yaml or the `[[datasets]]` in toml.*
+*The dataset configurations starts with the `datasets` config key in yaml or the `[[datasets]]` in toml.*
 
-Dataset allows provision of multiple datasets processing instruction which it handle sequentially. The configuration requires the following base parameters:
+Dataset allows provision of multiple datasets processing instruction which it handles sequentially. The configuration requires the following base parameters:
 
 #### dataset
 
@@ -318,9 +317,9 @@ Only three options exists for this: `mongodb`, `json-file` and `json-dir`.
 
 ##### mongodb
 
-Naturally, `mongodb` represents the the usage of a mongodb database collection as the source of the data, which then requires the addition of the following conifiguration parameters in the `conf` (in YAML) or `[datasets.conf.db]` (in TOML) section of each dataset.
+Naturally, `mongodb` represents the the usage of a mongodb database collection as the source of the data, which then requires the addition of the following configuration parameters in the `conf` (in YAML) or `[datasets.conf.db]` (in TOML) section of each dataset.
 
-*Why `conf` ? Because each driver requires specific config parameters, any thing specific to the driver is set in the `conf` section.*
+*Why `conf` ? Because each driver requires specific configuration parameters, any parameters specific to the driver is set in the `conf` section.*
 
 
 ```yaml
@@ -335,7 +334,7 @@ conf:
   host: db.mongo.com:4500
 ```
 
-The `mongodb` requires the provision of the `source` value which dictates the collection to be used with the provided mongodb configuration parameters provided in the `conf.db` section. The `dest` parameter is optional. The `dest` only function is to allow you to have Geckodataset not only push the transformed data to the Geckodataset API for the user's account, but also into another collection from within database of the source collection. This allows you to save these processed records for later use.
+The `mongodb` requires the `source` parameter, which dictates the collection to be used with the provided mongodb configuration provided in the `conf.db` section. The `dest` parameter is optional. The `dest` only function is to allow you to have Geckodataset not only push the transformed data to the Geckodataset API for the user's account, but also into another collection within database of the source collection. This allows you to save these processed records for later use.
 
 ##### json-file
 
