@@ -40,7 +40,7 @@ GeckoDataset provides a CLI tooling called `geckoboard-dataset` which is central
 Usage: dataset [flags] [command] 
 
 ⡿ COMMANDS:
-	⠙ push	Push data from a mongodb to the geckoboa
+	⠙ push	Push data from a source to the geckoboard Dataset API.
 
 
 ⡿ HELP:
