@@ -61,9 +61,163 @@ It which exposes a `push` command which handles the necessary logic to process p
 > geckoboard-dataset push -config config.toml
 ```
 
+## Transformers (Procs)
+
+GeckoDataset employs the idea of transformers/processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
+
+#### Javascript
+
+The type of processor is based on the usage of javascript file, which exposes a function which would be called to transform the provided json of incoming records into desired format, which then is transformed into json then is returned to the dataset system which umarshals and attempts to save into user's Geckboard dataset account.
+
+GeckoDataset uses [Otto](https://github.com/robertkrimen/otto) which is a golang javascript runtime for executing javascript, it does not support event loops based functions like those of `setInterval` and `setTimeout`, but does provide support for majority of the javascript runtime code. See project page for more details.
+
+#### Binaries
+
+This type of processor is based on the the usage of executable binary, which either is written to read from stdin a json of a record list or has a function which reads from stdin a json of record list, which will process and return appropriate json list containing the formated records which then is pushed up to the Geckboard user's dataset account.
+
+
 ## Configuration
 
 GeckoDataset supports configuration using either [Yaml](https://github.com/ghodss/yaml) or [TOML](https://github.com/toml-lang/toml) files.
+
+Listing below are different configuration for usage of the geckodataset CLI tooling for sourcing data either through a [MongoDB](htts://mongodb.com) database collection or through a json file or directory, using the YAML format (See [TOML Format](./config/toml.md) for toml version). 
+
+*Be careful in Yaml not to use tabs but spaces, has it gets troublesome*
+
+- Using Javascript Processor with JSON source file
+
+
+```yaml
+interval: 60s
+pull_batch: 100
+push_batch: 100
+api_key: your_api_key
+datasets:
+ - driver: "json-file"
+   op: push
+   dataset: "user_sales_freq"
+   fields:
+    - name: user
+      type: string
+    - name: scores
+      type: number
+   conf:
+    source: "./fixtures/sales/user_sales.json"
+    js:
+     target: transformDocument
+     main: "./fixtures/transforms/js/user_sales.js"
+     libraries: ["./fixtures/transforms/js/support/types.js"]
+```
+
+- Using Javascript Processor with JSON source directory
+
+
+```yaml
+interval: 60s
+pull_batch: 100
+push_batch: 100
+api_key: your_api_key
+datasets:
+ - driver: json-dir
+   op: push
+   dataset: "user_sales_freq"
+   fields:
+    - name: user
+      type: string
+    - name: scores
+      type: number
+   conf:
+    source_dir: "./fixtures/sales"
+    js:
+     target: transformDocument
+     main: "./fixtures/transforms/js/user_sales.js"
+     libraries: ["./fixtures/transforms/js/support/types.js"]
+```
+
+- Using Javascript Processor with MongoDB source
+
+
+```yaml
+interval: 60s
+pull_batch: 100
+push_batch: 100
+api_key: your_api_key
+datasets:
+ - driver: mongodb
+   op: push
+   dataset: user_sales_freq
+   fields:
+    - name: user
+      type: string
+    - name: scores
+      type: number
+   conf:
+    dest: user_sales_metrics
+    source: user_sales_collection
+    db:
+     authdb: admin
+     db: machines_sales
+     user: tobi_mach
+     password: "xxxxxxxxxxxx"
+     host: db.mongo.com:4500
+    js:
+     target: transformDocument
+     main: "./fixtures/transforms/js/user_sales.js"
+     libraries: ["./fixtures/transforms/js/support/types.js"]
+```
+
+- Binary Processor with JSON source file
+
+```yaml
+interval: 60s
+pull_batch: 100
+push_batch: 100
+api_key: your_api_key
+datasets:
+ - driver: json-file
+   op: push
+   dataset: "user_sales_freq"
+   fields:
+    - name: user
+      type: string
+    - name: scores
+      type: number
+   conf:
+    source: "./fixtures/sales/user_sales.json"
+    binary:
+     bin: echo
+```
+
+- Using Binary Processor with MongoDB source
+
+
+```yaml
+interval: 60s
+pull_batch: 100
+push_batch: 100
+api_key: your_api_key
+datasets:
+ - driver: mongodb
+   op: push
+   dataset: user_sales_freq
+   fields:
+    - name: user
+      type: string
+    - name: scores
+      type: number
+   conf:
+    dest: user_sales_metrics
+    source: user_sales_collection
+    db:
+     authdb: admin
+     db: machines_sales
+     user: tobi_mach
+     password: "xxxxxxxxxxxx"
+     host: db.mongo.com:4500
+    binary:
+     bin: echo
+```
+
 
 This configuration used by the project requires details for the following parts:
 
@@ -248,157 +402,6 @@ binary:
 The CLI tool will make the necessary calls by relying on `/bin/sh` with the following binary and command (if provided), where it will feed the incoming records as json strings into the `stdin`, expecting response from the `stdout`. This means the binary must always respond to `stdout` else Geckodataset will await a response till one is recieved.
 
 
-Listing below are different configuration for usage of the geckodataset CLI tooling for sourcing data either through a [MongoDB](htts://mongodb.com) database collection or through a json file or directory, using the YAML format (See [TOML Format](./config/toml.md) for toml version). 
-
-*Be careful in Yaml not to use tabs but spaces, has it gets troublesome*
-
-- Using Javascript Processor with JSON source file
-
-
-```yaml
-interval: 60s
-pull_batch: 100
-push_batch: 100
-api_key: your_api_key
-datasets:
- - driver: "json-file"
-   op: push
-   dataset: "user_sales_freq"
-   fields:
-    - name: user
-      type: string
-    - name: scores
-      type: number
-   conf:
-    source: "./fixtures/sales/user_sales.json"
-    js:
-     target: transformDocument
-     main: "./fixtures/transforms/js/user_sales.js"
-     libraries: ["./fixtures/transforms/js/support/types.js"]
-```
-
-- Using Javascript Processor with JSON source directory
-
-
-```yaml
-interval: 60s
-pull_batch: 100
-push_batch: 100
-api_key: your_api_key
-datasets:
- - driver: json-dir
-   op: push
-   dataset: "user_sales_freq"
-   fields:
-    - name: user
-      type: string
-    - name: scores
-      type: number
-   conf:
-    source_dir: "./fixtures/sales"
-    js:
-     target: transformDocument
-     main: "./fixtures/transforms/js/user_sales.js"
-     libraries: ["./fixtures/transforms/js/support/types.js"]
-```
-
-- Using Javascript Processor with MongoDB source
-
-
-```yaml
-interval: 60s
-pull_batch: 100
-push_batch: 100
-api_key: your_api_key
-datasets:
- - driver: mongodb
-   op: push
-   dataset: user_sales_freq
-   fields:
-    - name: user
-      type: string
-    - name: scores
-      type: number
-   conf:
-    dest: user_sales_metrics
-    source: user_sales_collection
-    db:
-     authdb: admin
-     db: machines_sales
-     user: tobi_mach
-     password: "xxxxxxxxxxxx"
-     host: db.mongo.com:4500
-    js:
-     target: transformDocument
-     main: "./fixtures/transforms/js/user_sales.js"
-     libraries: ["./fixtures/transforms/js/support/types.js"]
-```
-
-- Binary Processor with JSON source file
-
-```yaml
-interval: 60s
-pull_batch: 100
-push_batch: 100
-api_key: your_api_key
-datasets:
- - driver: json-file
-   op: push
-   dataset: "user_sales_freq"
-   fields:
-    - name: user
-      type: string
-    - name: scores
-      type: number
-   conf:
-    source: "./fixtures/sales/user_sales.json"
-    binary:
-     bin: echo
-```
-
-- Using Binary Processor with MongoDB source
-
-
-```yaml
-interval: 60s
-pull_batch: 100
-push_batch: 100
-api_key: your_api_key
-datasets:
- - driver: mongodb
-   op: push
-   dataset: user_sales_freq
-   fields:
-    - name: user
-      type: string
-    - name: scores
-      type: number
-   conf:
-    dest: user_sales_metrics
-    source: user_sales_collection
-    db:
-     authdb: admin
-     db: machines_sales
-     user: tobi_mach
-     password: "xxxxxxxxxxxx"
-     host: db.mongo.com:4500
-    binary:
-     bin: echo
-```
-
-## Transformers (Procs)
-
-GeckoDataset employs the idea of transformers/processors termed `procs` which provided functions internally that will take either a single record or a batch of records from the scanned mongodb collection and return as desired appropriate JSON response which will be stored into the user's Geckoboard dataset account.
-
-#### Javascript
-
-The type of processor is based on the usage of javascript file, which exposes a function which would be called to transform the provided json of incoming records into desired format, which then is transformed into json then is returned to the dataset system which umarshals and attempts to save into user's Geckboard dataset account.
-
-GeckoDataset uses [Otto](https://github.com/robertkrimen/otto) which is a golang javascript runtime for executing javascript, it does not support event loops based functions like those of `setInterval` and `setTimeout`, but does provide support for majority of the javascript runtime code. See project page for more details.
-
-#### Binaries
-
-This type of processor is based on the the usage of executable binary, which either is written to read from stdin a json of a record list or has a function which reads from stdin a json of record list, which will process and return appropriate json list containing the formated records which then is pushed up to the Geckboard user's dataset account.
 
 ## Disclaimer
 
