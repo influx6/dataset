@@ -83,9 +83,9 @@ type mgoDataset struct {
 	config.DriverConfig
 	config.DatasetConfig
 
-	Destination string       `toml:"dest"`
-	Source      string       `toml:"source"`
-	DB          mongo.Config `toml:"db"`
+	Destination string       `toml:"dest" json:"dest"`
+	Source      string       `toml:"source" json:"source"`
+	DB          mongo.Config `toml:"db" json:"db"`
 }
 
 // Validate returns an error if the config is invalid.

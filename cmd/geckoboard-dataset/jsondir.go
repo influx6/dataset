@@ -75,8 +75,8 @@ type jsonDirDataset struct {
 	config.DriverConfig
 	config.DatasetConfig
 
-	Deep      bool   `toml:"deep"`
-	SourceDir string `toml:"source_dir"`
+	Deep      bool   `toml:"deep" json:"deep"`
+	SourceDir string `toml:"source_dir" json:"source_dir"`
 }
 
 // Validate returns an error if the config is invalid.

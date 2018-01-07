@@ -27,10 +27,10 @@ const (
 // DriverConfig embodies the configuration used for defining user driver processor.
 type DriverConfig struct {
 	// JS indicates the configuration values for the JSOtto procs.
-	JS *JSOttoConf `toml:"js"`
+	JS *JSOttoConf `toml:"js" json:"js"`
 
 	// Binary indicates the configuration values to be used for the BinaryRunc procs.
-	Binary *BinaryConf `toml:"binary"`
+	Binary *BinaryConf `toml:"binary" json:"binary"`
 }
 
 // Validate returns an error if the config is invalid.
@@ -54,20 +54,20 @@ func (dc *DriverConfig) Validate() error {
 // for the proc processors who handle conversion of data to datastore records.
 type ProcConfig struct {
 	// APIKey indicates the user's Geckoboard API Key used for authentication of all save requests.
-	APIKey string `toml:"api_key"`
+	APIKey string `toml:"api_key" json:"api_key"`
 
 	// Pull, process and update record at giving intervals. (Optional)
-	Interval string `toml:"interval"`
+	Interval string `toml:"interval" json:"interval"`
 
 	// PullBatch indicates total records expected by proc to be processed.
-	PullBatch int `toml:"pull_batch"`
+	PullBatch int `toml:"pull_batch" json:"pull_batch"`
 
 	// PushBatch indicates total records to be pushed per call to the upstream API.
-	PushBatch int `toml:"pull_batch"`
+	PushBatch int `toml:"push_batch" json:"push_batch"`
 
 	// RunInterval gets the interval value provided through the `Interval` field or
 	// is set to DefaultInterval.
-	RunInterval time.Duration `toml:"-"`
+	RunInterval time.Duration `toml:"-" json:"-"`
 }
 
 // Validate returns an error if the config is invalid.
@@ -83,7 +83,7 @@ func (dc *ProcConfig) Validate() error {
 	}
 
 	if dc.APIKey == "" {
-		return errors.New("APIKey is required")
+		return errors.New("Config.APIKey is required")
 	}
 
 	if dc.PullBatch <= 0 {
@@ -99,27 +99,27 @@ func (dc *ProcConfig) Validate() error {
 
 // FieldType embodies field values for defining dataset field types.
 type FieldType struct {
-	Name     string `toml:"name"`
-	Type     string `toml:"type"`
-	Currency string `toml:"currency"`
-	Optional bool   `toml:"optional"`
+	Name     string `toml:"name" json:"name"`
+	Type     string `toml:"type" json:"type"`
+	Currency string `toml:"currency" json:"currency"`
+	Optional bool   `toml:"optional" json:"optional"`
 }
 
 // DatasetConfig embodies the configuration data used to define the dataset to
 // be used and corresponding dataset field values to be used to create dataset.
 type DatasetConfig struct {
 	// Dataset indicates the dataset to be used for saving processed results.
-	Dataset string `toml:"dataset"`
+	Dataset string `toml:"dataset" json:"dataset"`
 
 	// Fields indicates the fields defining the dataset which is expected to be used
 	// for storing the processed records.
-	Fields []FieldType `toml:"fields"`
+	Fields []FieldType `toml:"fields" json:"fields"`
 }
 
 // Validate returns an error if the config is invalid.
 func (dc *DatasetConfig) Validate() error {
 	if dc.Dataset == "" {
-		return errors.New("DatasetConfig.DatasetName is required")
+		return errors.New("DatasetConfig.Dataset is required")
 	}
 
 	return nil
@@ -129,9 +129,9 @@ func (dc *DatasetConfig) Validate() error {
 // providing user processing function for conversion of incoming mongo data
 // using the otto javascript vm. https://github.com/robertkrimen/otto.
 type JSOttoConf struct {
-	Main      string   `toml:"main"`
-	Target    string   `toml:"target"`
-	Libraries []string `toml:"libraries"`
+	Main      string   `toml:"main" json:"main"`
+	Target    string   `toml:"target" json:"target"`
+	Libraries []string `toml:"libraries" json:"libraries"`
 }
 
 // Validate returns an error if the config is invalid.
@@ -159,23 +159,23 @@ func (jsc JSOttoConf) Validate() error {
 // BinaryConf embodies data to be used to define the go binary used for processing
 // incoming data from the mongo collection.
 type BinaryConf struct {
-	// Binary path to golang binary for execution, where main expects data coming
+	// Bin path to golang binary for execution, where main expects data coming
 	// from stdin with processed data received from stdout.
-	Binary string `toml:"binary"`
+	Bin string `toml:"bin" json:"bin"`
 
 	// Command name to be used to run against binary if binary is not direct entry
 	// point for processor.
-	Command string `toml:"command"`
+	Command string `toml:"command" json:"command"`
 }
 
 // Validate returns an error if the config is invalid.
 func (gc *BinaryConf) Validate() error {
-	if gc.Binary == "" {
+	if gc.Bin == "" {
 		return errors.New("BinaryConf.Binary is required")
 	}
 
-	if filepath.IsAbs(gc.Binary) {
-		stat, err := os.Stat(gc.Binary)
+	if filepath.IsAbs(gc.Bin) {
+		stat, err := os.Stat(gc.Bin)
 		if err != nil {
 			return fmt.Errorf("BinaryConf.Binary must exists: %+s", err.Error())
 		}
@@ -187,11 +187,11 @@ func (gc *BinaryConf) Validate() error {
 		return nil
 	}
 
-	binaryPath, err := exec.LookPath(gc.Binary)
+	binaryPath, err := exec.LookPath(gc.Bin)
 	if err != nil {
 		return errors.New("BinaryConf.Binary target not found in host system: " + err.Error())
 	}
 
-	gc.Binary = binaryPath
+	gc.Bin = binaryPath
 	return nil
 }

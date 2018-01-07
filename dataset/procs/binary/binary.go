@@ -34,9 +34,9 @@ func (br BinaryRunc) Transform(ctx context.Context, records ...map[string]interf
 		return nil, err
 	}
 
-	command := br.Config.Binary
+	command := br.Config.Bin
 	if br.Config.Command != "" {
-		command = fmt.Sprintf(`%s %s`, br.Config.Binary, br.Config.Command)
+		command = fmt.Sprintf(`%s %s`, br.Config.Bin, br.Config.Command)
 	}
 
 	binaryCmd := exec.New(

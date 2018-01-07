@@ -20,7 +20,7 @@ func TestBinaryRun(t *testing.T) {
 	}
 
 	binrunc := binary.New(config.BinaryConf{
-		Binary: "./fixtures/bin/grun",
+		Bin: "./fixtures/bin/grun",
 	}, events)
 
 	res, err := binrunc.Transform(context.Background(), map[string]interface{}{
@@ -57,7 +57,7 @@ func TestBinaryRunWithCommand(t *testing.T) {
 	}
 
 	binrunc := binary.New(config.BinaryConf{
-		Binary:  "./fixtures/bin/trun",
+		Bin:     "./fixtures/bin/trun",
 		Command: "Transform",
 	}, events)
 

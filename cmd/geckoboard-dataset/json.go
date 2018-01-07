@@ -76,7 +76,7 @@ type jsonDataset struct {
 	config.DriverConfig
 	config.DatasetConfig
 
-	Source string `toml:"source"`
+	Source string `toml:"source" json:"source"`
 }
 
 // Validate returns an error if the config is invalid.
