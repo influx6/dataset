@@ -209,7 +209,7 @@ Listing below are different configuration for usage of the geckodataset CLI tool
 - Using Javascript Processor with JSON source file
 
 
-```toml
+```yaml
 interval: 60s
 pull_batch: 100
 push_batch: 100
@@ -233,7 +233,7 @@ datasets:
 - Using Javascript Processor with JSON source directory
 
 
-```toml
+```yaml
 interval: 60s
 pull_batch: 100
 push_batch: 100
@@ -257,7 +257,7 @@ datasets:
 - Using Javascript Processor with MongoDB source
 
 
-```toml
+```yaml
 interval: 60s
 pull_batch: 100
 push_batch: 100
@@ -287,7 +287,7 @@ datasets:
 
 - Binary Processor with JSON source file
 
-```toml
+```yaml
 interval: 60s
 pull_batch: 100
 push_batch: 100
@@ -309,7 +309,7 @@ datasets:
 - Using Binary Processor with MongoDB source
 
 
-```toml
+```yaml
 interval: 60s
 pull_batch: 100
 push_batch: 100
