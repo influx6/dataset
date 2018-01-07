@@ -23,6 +23,14 @@ To run integration test `TestJavascriptPushIntegration` in `./cmd/geckoboard-dat
 
 *All other tests do not need the environment variable.*
 
+To go further, after running `TestJavascriptPushIntegration`, you can go to your account page on Geckoboard, and using the `Column Chart` widget, like below:
+ 
+ ![Create Column Chart](./media/make.png) 
+ 
+ We can create the metric dashboard like below:
+ 
+ ![Create Column Chart](./media/bar.png) 
+
 ## Run
 
 GeckoDataset provides a CLI tooling called `geckoboard-dataset` which is central means of using the project:

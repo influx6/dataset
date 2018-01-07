@@ -15,6 +15,7 @@ var (
 pull_batch: 3
 push_batch: 3
 api_key: {{ env "GECKOBOARD_TEST_KEY" }}
+unique_by: [user]
 datasets:
  - driver: "json-file"
    op: push
